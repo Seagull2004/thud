@@ -72,40 +72,50 @@
 
 %% Capitolo
 \chapter{Introduzione}
-In hac habitasse platea dictumst. Vestibulum consectetur dictum pellentesque. Suspendisse nunc neque, commodo ac imperdiet nec, sollicitudin vitae libero. Donec bibendum vel nunc vitae pharetra. In vel volutpat odio, et interdum dui. Duis mauris ligula, congue eget molestie at, tincidunt nec diam. Nam vitae eros nec arcu suscipit vehicula. Aliquam consectetur imperdiet elit, eget pretium arcu fringilla at. Maecenas \cite{Knu86} sed libero pulvinar, mattis tortor vel, fermentum enim... \cite{Lam94}
-%
-%% Sezione
-\section{Titolo della Sezione}
-Donec pulvinar neque non lectus vulputate pellentesque. Quisque rutrum arcu velit, in feugiat sapien posuere vel. Praesent metus orci, aliquam ac cursus eget, fermentum a nisl. Etiam eu augue lacus. Nam nisi sapien, mattis sed vehicula non, pellentesque at quam. Sed euismod, dolor nec commodo lobortis, erat erat ultricies eros, bibendum dictum nulla felis in dui. Nulla blandit ultrices arcu, vitae lacinia tellus tempor sit amet. Nulla non tincidunt dolor. In eget luctus sem, sed elementum ligula. Proin elementum adipiscing sem, sit amet ultricies nisl tincidunt eu. Ut lobortis dui quam, et scelerisque erat ultrices sit amet. Sed libero sem, mollis quis euismod quis, suscipit ac justo.
 
-%% Sottosezione
-\subsection{Sottosezione}
-Donec cursus tortor eget sem ornare imperdiet. Ut vel orci non ipsum condimentum laoreet vitae ut sapien. Aenean metus mi, vehicula quis turpis nec, porttitor blandit dui. Nullam sed sollicitudin quam. Fusce nisl ante, commodo eget lacus ac, mollis ullamcorper neque. Quisque faucibus dictum nisl, dignissim fermentum sapien fringilla vel. Proin dui velit, molestie sit amet sapien et, pellentesque tristique purus. Curabitur ac quam ac diam varius bibendum.
+Si vuole realizzare un algoritmo che permetta di ottenere un indice numerico sulla base del livello di sfocatura di una immagine che permetta di rilevare, o meno, la presenza di tale artefatto. In particolare, le immagini da considerare provengono da un flusso video ottenuto tramite delle telecamere IP posizionate in corrispondenza di una serie di targhe (\textit{plate}) contenenti un codice realizzato tramite una codifica Hamming.
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam auctor odio sit amet tempor consequat. Suspendisse auctor vel augue ut aliquet. Suspendisse potenti. Nullam eget leo eu neque ornare mattis in in tortor. Phasellus finibus, orci nec interdum placerat, leo libero rutrum ipsum, vel varius elit leo vel lacus. Pellentesque a tristique nibh, dictum egestas augue. Aliquam egestas ligula nec diam vulputate, vel bibendum justo sodales. Nunc imperdiet ut est non ultrices. Pellentesque enim tortor, suscipit et neque vel, varius gravida dolor. In sed lobortis tellus. Duis ac sem ac mi aliquet imperdiet eu eget ligula. Aliquam ligula nisl, rhoncus eget orci a, cursus dapibus urna. Donec commodo consequat mi.
+\section{Presentazione scenario}
 
-Donec elementum erat vitae nunc commodo ultrices. Vivamus auctor arcu pharetra orci cursus, sodales dictum urna egestas. Pellentesque eget felis augue. Quisque tempus non nulla sed aliquam. Nam sagittis eros lectus, a mattis felis malesuada at. Sed et semper dui. Nunc luctus, diam ac ultricies euismod, augue odio consequat ante, vel vehicula ipsum mauris sed nunc. Pellentesque consequat, eros et volutpat maximus, justo metus commodo ante, vitae egestas nisl mi non orci.
+L'infrastruttura aziendale presa in considerazione prevede una serie di telecamera IP, posizionate in punti strategici, che tramite protocollo RTSP forniscono un flusso di immagini ad una \textit{pipeline} di riconoscimento di codici. Tali immagini vengono processate dalla \textit{pipeline}, che attraverso una serie livelli di elaborazione riesce ad ottenere il valore numerico associato al codice del \textit{plate}. Tuttavia, non sempre per la \textit{pipeline} è possibile riconoscere tale valore, e questo è dovuto a due motivi principali. Il primo è dato dal fatto che il \textit{plate} non è affatto presente nell'immagine. Il secondo motivo per cui la pipeline non è capace di riconoscere il valore numerico è legato a fenomeni esterni come una scarsa illuminazione, una messa a fuoco dell'immagine precaria, la presenza parziale del \textit{plate} o la stessa dimensione che la targa con il codice assume nell'immagine complessiva. In questi casi succede che il livello di affidabilità garantito dalla decodifica non supera un certo limite di affidabilità impostato a priori nelle impostazioni del riconoscitore. 
 
-Vestibulum aliquet tempor magna sit amet tincidunt. Vivamus congue leo eu lectus vestibulum, ut tincidunt tellus viverra. Etiam sit amet blandit dolor. Sed eget varius dolor. Cras porta euismod mi feugiat posuere. Proin elit nulla, pulvinar vitae fermentum id, varius nec leo. Nullam eu erat nulla. Etiam erat ante, lobortis vel sagittis quis, pretium in lectus. Aenean accumsan, quam sagittis fringilla gravida, nulla massa ullamcorper nisi, non pretium leo magna ac tellus. Nunc vel lectus dapibus, pulvinar sem id, gravida urna. Duis tempor imperdiet consectetur. Quisque nec risus diam.
+Per questo motivo è importante poter far affidamento ad un indice che sia indipendente dalla presenza del \textit{plate} all'interno dell'immagine che permetta di valutare se l'immagine è messa a fuoco o meno. In questo modo sarebbe possibile correggere la ripresa di una telecamera in anticipo e prevenire lunghi periodi di tempo durante i quali la pipeline di riconoscimento non valuta alcun valore, ma non perché il codice è assente nell'immagine ma perché la telecamera non sta andando a mettere a fuoco in maniera appropriata.
 
-Pellentesque purus dui, lobortis sed maximus at, consequat eu ex. Phasellus eu porttitor dolor. Integer ornare justo elit, eget porttitor tortor porta vel. Quisque sit amet urna tempor, mollis quam in, faucibus orci. Sed auctor efficitur malesuada. Aliquam lacinia laoreet augue, varius imperdiet sem bibendum at. Mauris neque nunc, fringilla ac commodo mollis, pellentesque tincidunt est.
+\chapter{Sviluppo delle metriche}
 
-Nunc commodo, quam id maximus dignissim, ligula magna convallis mauris, a elementum nisl metus at nisl. Donec risus ante, maximus at iaculis eget, placerat nec nulla. Sed tincidunt sodales justo eget finibus. Sed urna magna, dapibus at massa scelerisque, facilisis fringilla justo. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nulla eleifend semper erat, ut placerat metus. Quisque laoreet ultrices est. Sed porta fermentum odio. Cras ornare erat nec ultricies hendrerit.
-
-Nunc commodo, libero consectetur imperdiet faucibus, nisi mauris pulvinar quam, pellentesque vehicula neque mi maximus justo. Nulla tristique, lacus et rhoncus varius, orci nibh dictum mauris, fringilla elementum elit elit ut tortor. Curabitur euismod quis sem et mollis. Sed feugiat dignissim tincidunt. Mauris cursus dictum venenatis. Nunc fermentum at metus ac vehicula. Duis sodales tellus magna, sit amet luctus urna imperdiet sed.
-
-Fusce dolor urna, suscipit sed mi aliquam, aliquam convallis leo. Pellentesque quam nunc, consequat non posuere sed, fermentum ut urna. Nullam vehicula rutrum ex, at vehicula sem rhoncus a. Vivamus scelerisque, dolor in tristique mollis, leo diam laoreet velit, at semper enim velit ac dui. Donec placerat, odio nec maximus ultricies, tellus nibh lobortis orci, ut gravida ligula nibh in ante. Aenean blandit viverra tempus. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. In vitae efficitur est. Nam venenatis, nisi vitae condimentum pretium, nunc libero accumsan nulla, in accumsan turpis enim at velit. Donec semper dolor posuere orci facilisis volutpat. Vestibulum lorem leo, tempor vitae porta id, mattis commodo dui. Cras aliquet non risus at accumsan. Suspendisse viverra, mi in blandit hendrerit, enim magna faucibus eros, id egestas lacus magna non leo.
-
-Morbi suscipit tempor ante a varius. Fusce eu lobortis eros. Quisque quis pharetra metus, dictum luctus ligula. In a tincidunt nibh, vel scelerisque arcu. Donec consequat justo condimentum tempus iaculis. Nullam interdum id metus vel sagittis. Proin ante tortor, posuere a vehicula sit amet, dapibus ut metus. Etiam consectetur, tortor sit amet lacinia varius, nibh purus vehicula ex, sit amet fermentum justo urna a ante.
-
-Phasellus feugiat neque sed risus faucibus tristique nec sit amet magna. Fusce lacus erat, fermentum non pharetra et, auctor et tellus. Donec gravida id urna quis auctor. Quisque ultrices id orci id posuere. In hac habitasse platea dictumst. Phasellus ante nibh, fermentum a vehicula sit amet, efficitur vel orci. Phasellus eget justo orci. Fusce ut tellus nisl. Nullam sit amet ipsum justo. Proin suscipit purus facilisis, tristique arcu in, venenatis dui. Quisque a pellentesque augue. Sed blandit viverra feugiat. Curabitur volutpat luctus maximus. Nulla sed condimentum nibh, sed rutrum velit. Cras pellentesque lectus est, vestibulum vehicula arcu elementum a.
-
-Sed dapibus augue rutrum augue ultrices, in tristique lectus malesuada. Praesent pharetra at arcu eu pellentesque. Cras ac est arcu. Suspendisse euismod pellentesque diam, id porta metus. Donec porta ex vel ornare tincidunt. Nunc non tortor sodales, lacinia diam quis, malesuada lectus. Cras a ultrices massa, a semper ligula.
+Per ottenere un indice che permetta di determinare la nitidezza di una immagine si può procedere facendo uso di una serie di approcci diversi. Si può fare distinzione tra le \textbf{metriche basate sull'analisi delle frequenze} e le \textbf{metriche basate sull'\textit{edge detection}}. Queste sono le due tipologie principali ma non sono le sole, infatti si può andare ad osservare ulteriori caratteristiche della natura dell'immagine che non sono, almeno direttamente, associabili ad una di queste due macro tipologie.
 
 
-\chapter{Problema}
+\section{Metriche basate sull'analisi delle frequenze}
 
-\chapter{Soluzione}
+L'idea che sta alla base dell'utilizzo di una metrica basata sull'analisi delle frequenze, sta nel considerare una immagine come un segnale bidimensionale. Le immagini infatti sono dei segnali discreti a due dimensioni. Il valore assunto da ciascun \textit{pixel} è paragonabile al valore assunto dall'ordinata in un segnale monodimensionale. Se quindi, utilizzando strumenti come la trasformata di Fourier, è possibile estrarre lo spettro delle frequenze, allora si può constatare che una immagine nitida, rispetto ad una sfocata, sarà composta da frequenze più elevate. Tali frequenze nell'immagine vengono rappresentate dai piccoli dettagli o dalle rapide variazioni di colore, caratteristica invece non presente in una immagine sfocata.
+
+Entrambe le metriche che seguono si basano sulla trasformata discreta di Fourier (DTF) e differiscono nel modo in cui tale risultato viene valutato.
+
+\subsection{Fourier}
+
+\subsection{Skewness}
+
+
+\section{Metriche basate sull'edge detection}
+
+Per quanto riguarda le metriche basate sull'\textit{edge detection} il concetto alla base delle diverse interpretazioni è che un'immagine nitida ha dei bordi ben definiti e in quantità maggiore rispetto ad un'immagine sfocata.
+
+\subsection{Laplacian}
+
+\subsection{Canny}
+
+\section{Altre metriche}
+
+\chapter{Definizione dei threshold}
+
+Qui spiego come sono stati definiti i boundary per ogni metrica.
+
+\chapter{Valutazione e confronto delle metriche}
+
+
+
+\chapter{Conclusioni e considerazioni finali}
 
 
 %% Fine dei capitoli normali, inizio dei capitoli-appendice (opzionali)

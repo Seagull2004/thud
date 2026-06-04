@@ -11,3 +11,5 @@ thesis*.lof
 thesis*.lot
 thesis*.fls
 thesis*.fdb_latexmk
+
+**/.DS_Store
