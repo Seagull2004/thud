@@ -52,3 +52,33 @@ Si assume che sappiate scrivere in LaTeX; altrimenti, [sappiatelo](https://www.l
 7. Preparare le slide, eventualmente con il formato ufficiale del dipartimento.
 8. Esporre slide.pptx.
 9. Ubriacarsi con amici e parenti.
+
+# Brain storming 🧠
+
+1. introduzione
+  - obiettivi 
+    - cosa?
+    - cosa voglio realizzare?
+  - scenario applicazione 
+    - ambiente aziendale e software presenti
+    - chi?
+    - perché? che problemi richiedono il mio software?
+  - considerazioni implementative
+    - considerazioni sul tipo di immagine da analizzare, dell'ambiente e altre motivazioni che portano alle "immagini sfocate"
+2. sviluppo delle metriche
+  - possibili soluzioni
+  - metriche basate sull'analisi delle frequenze
+  - metriche basate sull'edge detection
+  - altre metriche
+  - qui voglio solo parlare di come funzioni l'algoritmo (input: immagine -> output: numero)
+3. definizione dei threshold
+  - fase di generazione delle immagini sfocate
+  - generazione di immagini sfocate sulla base delle immagini ridimensionate
+  - utilizzo del riconoscitore per stabilire i limiti
+  - determinazione threshold (anche per-telecamera)
+4. valutazione e confronto threshold ottenuti
+  - varianza
+  - deviazione standard
+  - normalizzazione
+5. Conclusioni
+  - un riassunto e panoramica di quello che si è realizzato nei punti precedenti
