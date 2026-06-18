@@ -18,6 +18,35 @@
 \supervisor{Prof.\ Agostino Dovier}
 % \cosupervisor{Arch.\ Rambaldo Melandri \and Dott.\ Giorgio Perozzi}
 \tutor{Ing. Umberto Piconi}
+\usepackage{listings} % scrivere codice
+\usepackage{xcolor}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2
+}
+
+\lstset{style=mystyle}
 %% Campi obbligatori: \title, \author e \course.
 %% Altri campi disponibili: \reviewer, \tutor, \chair, \date (anno accademico, calcolato in automatico), \rights
 %% Con \supervisor, \cosupervisor, \reviewer e \tutor si possono indicare più nomi separati da \and.
@@ -89,16 +118,42 @@ Le telecamere sono configurate in modo tale da gestire la messa a fuoco in manie
 
 \chapter{Sviluppo delle metriche}
 
-Per ottenere un indice che permetta di determinare la nitidezza di una immagine si può procedere facendo uso di una serie di approcci diversi. Si può fare distinzione tra le \textbf{metriche basate sull'analisi delle frequenze} e le \textbf{metriche basate sull'\textit{edge detection}}. Queste sono le due tipologie principali ma non sono le sole, infatti si può andare ad osservare ulteriori caratteristiche della natura dell'immagine che non sono, almeno direttamente, associabili ad una di queste due macro tipologie.
+Per ottenere un indice che permetta di determinare la nitidezza di una immagine si può procedere facendo uso di una serie di approcci diversi. Si può fare distinzione tra le \textbf{metriche basate sull'analisi delle frequenze} e le \textbf{metriche basate sull'\textit{edge detection}}. Queste sono le due tipologie principali utilizzate nell'ambito del'\textit{image processing} ma non sono le sole, infatti si può andare ad osservare ulteriori caratteristiche della natura dell'immagine che non sono, almeno direttamente, associabili ad una di queste due macro tipologie. Prima di eseguire uno qualsiasi di questi algoritmi l'immagine subirà un \textit{preprocessing} che andrà a normalizzare alcune caratteristiche di essa, in particolare lo studio è che stato effettuato ha considerato una normalizzazione della luminosità e una conversione dei colori in scala di grigio.
 
 
 \section{Metriche basate sull'analisi delle frequenze}
 
-L'idea che sta alla base dell'utilizzo di una metrica basata sull'analisi delle frequenze, sta nel considerare una immagine come un segnale bidimensionale. Le immagini infatti sono dei segnali discreti a due dimensioni. Il valore assunto da ciascun \textit{pixel} è paragonabile al valore assunto dall'ordinata in un segnale monodimensionale. Se quindi, utilizzando strumenti come la trasformata di Fourier, è possibile estrarre lo spettro delle frequenze, allora si può constatare che una immagine nitida, rispetto ad una sfocata, sarà composta da frequenze più elevate. Tali frequenze nell'immagine vengono rappresentate dai piccoli dettagli o dalle rapide variazioni di colore, caratteristica invece non presente in una immagine sfocata.
+L'idea che sta alla base dell'utilizzo di una metrica basata sull'analisi delle frequenze, sta nel considerare una immagine come un segnale bidimensionale. Le immagini infatti sono dei segnali discreti a due dimensioni. Il valore assunto da ciascun \textit{pixel} è paragonabile al valore assunto dall'ordinata in un segnale monodimensionale. Se quindi, utilizzando strumenti come la trasformata di Fourier, è possibile estrarre lo spettro delle frequenze, allora si può constatare che una immagine nitida, rispetto ad una sfocata, sarà composta da frequenze più elevate. Tali frequenze nell'immagine vengono rappresentate dai piccoli dettagli o dalle rapide variazioni di colore, caratteristiche invece non presenti in una immagine sfocata.
 
 Entrambe le metriche che seguono si basano sulla trasformata discreta di Fourier (DTF) e differiscono nel modo in cui tale risultato viene valutato.
 
 \subsection{Fourier}
+
+Questa metrica sfrutta il posizionamento dei valori della matrice di Fourier per determinare le frequenze basse e alte presenti nell'immagine. Dopo aver computato la matrice di Fourier, avremo a disposizione dei numeri complessi che rappresentano lo spettro dell'immagine considerata. In posizione centrale a questa matrice troveremo la frequenza 0, e mano a mano che ci spostiamo sulla periferia avremo a disposizione le frequenze più basse. Per ognuno di questi numeri complessi andiamo a calcolare il modulo e lo andiamo a salvare in una matrice di dimensioni analoghe. Consideriamo poi la sommatoria delle frequenze basse e alte considerando "basse" le frequenze che si trovano all'interno di un cerchio avente raggio pari al 10\% del valore minore tra altezza e larghezza della matrice di Fourier, le frequenze "alte" saranno tutte le altre. L'indice $\alpha$ poi considererà il rapporto che c'è tra queste due sommatorie:
+
+\begin{equation}
+\alpha = \frac{\sum_{ f\in \Omega_{low} } || f ||}{\sum_{ f\in \Omega }^{  } || f ||}
+\end{equation}
+
+Dove $ \alpha $ è il \textit{blur value}, $ \Omega $ è la trasformata di fourier e $\Omega_{low}$ sono i valori della trasformata di fourier per le frequenze più basse.
+
+$\alpha$ è un valore che sta tra 0 e 1, se il denominatore è più grande rispetto al numeratore significa che saranno presenti contributi significativi dalle frequenze più alte e quindi l'immagine sarà più nitida e il \textit{blur value} si muoverà verso lo 0, via via che l'immagine diventa più sfocata i contributi delle frequenze più alte diminuiranno e il rapporto si avvicinerà a 1.
+
+Lo pseudo codice che implementa questa metrica è il seguente:
+
+\begin{lstlisting}[language=python]
+def getBlurValue(image):
+    omega = fft(image)        # trasformata di fourier
+    magnitude = abs(omega)    # calcolo moduli
+    h, w = shape(magnitude)
+    cutoff = min(h, w) * 0.1  # limite per le basse frequenze
+
+    low = magnitude[where r < cutoff].sum()
+    high = magnitude[where r >= cutoff].sum()
+
+    return low / (high + low)
+\end{lstlisting}
+
 
 \subsection{Skewness}
 
