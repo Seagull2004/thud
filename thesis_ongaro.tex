@@ -18,6 +18,8 @@
 \supervisor{Prof.\ Agostino Dovier}
 % \cosupervisor{Arch.\ Rambaldo Melandri \and Dott.\ Giorgio Perozzi}
 \tutor{Ing. Umberto Piconi}
+\usepackage{graphicx} % Per immagini
+\usepackage{float}
 \usepackage{listings} % scrivere codice
 \usepackage{xcolor}
 
@@ -154,8 +156,22 @@ def getBlurValue(image):
     return low / (high + low)
 \end{lstlisting}
 
+Le immagini che seguono sono una rappresentazione della trasformata di Fourier di due immagini che differiscono nella loro nitidezza. Si può notare che nella prima il maggior valore dei moduli si trova nel centro, dove vengono posizionate le frequenze più basse, al contrario nella seconda osserviamo moduli più alti in corrispondenza delle frequenze più alte.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{./img/fourier-blurry.png}
+    \caption{Magnitude della FFT per una immagine sfocata}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{./img/fourier-sharp.png}
+    \caption{Magnitude della FFT per una immagine nitida}
+\end{figure}
 
 \subsection{Skewness}
+
 
 
 \section{Metriche basate sull'edge detection}
