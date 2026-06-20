@@ -247,13 +247,29 @@ def getBlurValue(image):
 
 \section{Altre metriche}
 
-Da parlare della dimensione assunta dal file jpeg e dalla varianza dell'immagine.
+Le metriche basate sull'analisi delle frequenze e le metriche basate sull'edge detection non sono le sole, infatti è possibile creare un indice per stabilire se l'immagine è sfocata o meno anche osservando la dimensione in byte dell'immagine JPEG \cite{jpeg}. Le immagini JPEG sfocate infatti occupano poco spazio perché la compressione JPEG è basata sulla perdita di dettaglia ad alta frequenza, che sono esattamente quelli che definiscono la nitididezza e i bordi definiti. Per una immagine sfocata il processo di compressione ha meno informazioni complesse da eliminare o ridurre, risultando in file più piccoli rispetto ad una immagine completamente nitida. Questa soluzione ha il vantaggio di essere molto semplice ma bisogna tenere a mente che è una metrica molto delicata siccome due immagini nitide con stessa risoluzione potrebbero avere delle dimensioni completamente diverse, questo perché la dimensione dipende da altri fattori come ad esempio il range di colori usato nell'immagine, o la dimensione che i dettagli assumono all'interno dell'immagine. Nel grafico seguetne viene riportato l'andamento della dimensione di una immagine JPEG 640x480 che viene via via sfocata in maniera sempre più accentuata attraverso un kernel di dimensione sempre maggiore.
 
-\cite{jpeg}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{./img/jpgsize.png}
+    \caption{Dimensione di una immagine JPEG che viene via via sfocata}
+\end{figure}
+
+Un'altro sistema che si può utilizzare per costruire una metrica che permetta di capire se una immagine è sfocata o no consiste nell'analisi della varianza dell'immagine stessa. L'immagine infatti non è altro che un vettore bidimensionale contenente dei valori numerici che vanno a definire il colore di ogni pixel e la varianza è direttamente proporzionale alla nitidezza dell'immagine. Un'immagine monocromatica, ossia l'immagine sfocata per antonomasia, avrà una varianza nulla e via via che aggiungiamo dettagli all'immagine otterremo una varianza sempre maggiore.
 
 \chapter{Definizione dei threshold}
 
-Qui spiego come sono stati definiti i boundary per ogni metrica.
+Le metriche che sono state definite offrono un indice numerico che può venire usato per determinare il livello di \textit{blur} di una immagine, ma per stabilere se una immagine sia sfocata o meno bisogna stabilire un limite (\textit{threshold}) al di sopra del quale si può dire con buona approssimazione che l'immagine sia sfocata. Ogni metrica avrà una soglia diversa data la loro natura ma sicuramente sarà un valore $t$ compreso nell'intervallo $[0,1]$. C'è la necessità di capire quindi per una certa immagine, quanto questa possa venire sfocata prima che il riconoscitore dei \textit{plate} dia un errore a causa di uno scarso livello di affidabilità, e sarà proprio questo il limite che rappresenterà il \textit{threshold} $t$. Supponiamo di avere un certo insieme di immagini $I_1,I_2,\dots,I_n$ raffiguranti un \textit{plate} ben visibile, questo insieme rappresenterà il \textit{dataset} da utilizzare per determinare in maniera empirica il valore di $t$. Sia $I_i$ una certa immagine di questo insieme mentre $I^1_i,I^2_i,I^3_i,\dots$ le versioni sfocate con un kernel via via sempre maggiore. Il riconoscitore sarà capace di individuare il codice contenuto nel \textit{plate} fino ad una certa versione $m$, mentre da $m+1$ in poi l'esito del riconoscitore sarà negativo a causa di una scarsa affidabilità data dalla sfocatura eccessiva. Per quella singola immagine otterremo un valore per $t_i$ che sarà il risultato del calcolo del \textit{blur value} $\alpha$ calcolato con la metrica scelta per l'immagine $I_i^m$.
+
+Una volta ottenuti i valori $t_1,t_2,t_3,\dots,t_n$ derivanti dalle varie immagini si può andare a definire un valore di limite $t$ che permetta di stabilire se una nuova immagine $J$ sia sfocata o no. Un buon modo per determinare $t$ è semplcemente dato dalla media dei risultati ottenuti
+
+\begin{equation}
+  t =  \frac{1}{n} \sum_{i=1}^{n} t_i
+\end{equation}
+
+ma ovviamente è possibile utilizzare diverse altre funzioni come quella di massimo in modo da ridurre al minimo il numero di falsi positivi, ossia immagini nitide che vengono classificate come sfocate. Si può anche fare uso della funzione di minimo, in questo caso ci assicuriamo maggiori probabilità di riconoscere tutte le immagini sfocate a costo di introdurre più falso positivo.
+
+In questo modo possiamo andare a definire dei $t$ diversi per ogni metrica, che possiamo chiamare $t_{fourier}$, $t_{skew}$, $t_{laplacian}$ e $t_{canny}$.
 
 \chapter{Valutazione e confronto delle metriche}
 
