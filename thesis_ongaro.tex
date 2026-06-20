@@ -131,7 +131,7 @@ Entrambe le metriche che seguono si basano sulla trasformata discreta di Fourier
 
 \subsection{Fourier}
 
-Questa metrica sfrutta il posizionamento dei valori della matrice di Fourier per determinare le frequenze basse e alte presenti nell'immagine. Dopo aver computato la matrice di Fourier, avremo a disposizione dei numeri complessi che rappresentano lo spettro dell'immagine considerata. In posizione centrale a questa matrice troveremo la frequenza 0, e mano a mano che ci spostiamo sulla periferia avremo a disposizione le frequenze più basse. Per ognuno di questi numeri complessi andiamo a calcolare il modulo e lo andiamo a salvare in una matrice di dimensioni analoghe. Consideriamo poi la sommatoria delle frequenze basse e alte considerando "basse" le frequenze che si trovano all'interno di un cerchio avente raggio pari al 10\% del valore minore tra altezza e larghezza della matrice di Fourier, le frequenze "alte" saranno tutte le altre. L'indice $\alpha$ poi considererà il rapporto che c'è tra queste due sommatorie:
+Questa metrica sfrutta il posizionamento dei valori della matrice di Fourier \cite{fourier} per determinare le frequenze basse e alte presenti nell'immagine. Dopo aver computato la matrice di Fourier, avremo a disposizione dei numeri complessi che rappresentano lo spettro dell'immagine considerata. In posizione centrale a questa matrice troveremo la frequenza 0, e mano a mano che ci spostiamo sulla periferia avremo a disposizione le frequenze più basse. Per ognuno di questi numeri complessi andiamo a calcolare il modulo e lo andiamo a salvare in una matrice di dimensioni analoghe. Consideriamo poi la sommatoria delle frequenze basse e alte considerando "basse" le frequenze che si trovano all'interno di un cerchio avente raggio pari al 10\% del valore minore tra altezza e larghezza della matrice di Fourier, le frequenze "alte" saranno tutte le altre. L'indice $\alpha$ poi considererà il rapporto che c'è tra queste due sommatorie:
 
 \begin{equation}
 \alpha = \frac{\sum_{ f\in \Omega_{low} } || f ||}{\sum_{ f\in \Omega }^{  } || f ||}
@@ -172,6 +172,48 @@ Le immagini che seguono sono una rappresentazione della trasformata di Fourier d
 
 \subsection{Skewness}
 
+Questa metrica fa uso dell'indice di \textit{skewness} \cite{skewness}, ossia un valore che permette di misurare la forma della funzione di distribuzione delle frequenze. Per costruire la curva di distribuzione vanno considerati i valori assunti dai moduli degli elementi della trasformata di Fourier andando a campionare i valori in cerchi concentrici centrati nella frequenza 0. L'indice di \textit{skewness} ci dirà poi se la distribuzione è \textit{right-skewed} con un numero positivo o \textit{left-skewed} con un numero negativo. In particolare ci aspettiamo una distribuzione \textit{right-skewed} siccome i contributi delle basse frequenze contribuiscono in maniera più significativa, specialmente quando l'immagine diventa più sfocata. L'indice di \textit{skewness} sarà poi ottenuto tramite una formula, come ad esempio quella di \textit{Pearson}:
+
+
+\begin{equation}
+Pearson's\, median\, skewness  = 3 \cdot \frac{Mean - Median}{Standard\, deviation}
+\end{equation}
+
+Come si può constatare dalle immagini che seguono, l'idea è quella che un immagine sfocata ha una curva \textit{right-skewed} più accentuata rispetto a quella di una immagine più nitida, quindi questa metrica darà un valore più alto che sta a significare che la curva si sta muovendo sempre di più da una distribuzione normale.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{./img/skew-blurry.png}
+    \caption{Somma magnitudi per frequenza di una immagine sfocata}
+\end{figure}
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{./img/skew-sharp.png}
+    \caption{Somma magnitudi per frequenza di una immagine nitida}
+\end{figure}
+
+Dopo aver calcolato l'indice di \textit{skewness} per normalizzare il risultato e mantenerlo all'interno dell'intervallo $[0,1]$ è possibile applicare la funzione sigmoide. Lo pseudocodice che descrive il calcolo per questa metrica è quindi il seguente:
+
+\begin{lstlisting}[language=python]
+def getBlurValue(image):
+    omega = fft(image)
+    magnitude = abs(omega)
+    h, w = shape(fft)
+
+    radiusValues = []
+    for (radius = 1, radius < min(w,h), radius++):
+        radiusValues.push(magnitude[r == radius].sum())
+
+    mean = mean(radiusValues)
+    median = median(radiusValues)
+    std = std(radiusValues)
+    if std == 0:
+        return 1
+    skew = 3 * (mean - median) / std
+    return sigmoid(skew)
+\end{lstlisting}
 
 
 \section{Metriche basate sull'edge detection}
@@ -193,6 +235,15 @@ Qui spiego come sono stati definiti i boundary per ogni metrica.
 
 
 \chapter{Conclusioni e considerazioni finali}
+
+\cite{sobel}
+
+\cite{canny}
+
+\cite{laplacian}
+
+
+
 
 
 %% Fine dei capitoli normali, inizio dei capitoli-appendice (opzionali)
