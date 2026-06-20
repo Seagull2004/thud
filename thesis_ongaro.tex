@@ -220,11 +220,36 @@ def getBlurValue(image):
 
 Per quanto riguarda le metriche basate sull'\textit{edge detection} il concetto alla base delle diverse interpretazioni è che un'immagine nitida ha dei bordi ben definiti e in quantità maggiore rispetto ad un'immagine sfocata.
 
+
 \subsection{Laplacian}
+
+Questa metrica prevede l'utilizzo del filtro Laplacian \cite{laplacian}. Questo filtro permette di calcolare la derivata spaziale di una immagine e lo fa rilevando le regioni dell'immagine che subiscono dei cambiamenti di intensità immediati. Una volta ottenuta la derivata, valutandone la sua varianza sarà possibile creare un indice inversamente proporzionale al livello di sfocatura: se la varianza è elevata allora l'immagine sarà nitida e questo deriva dal fatto tale tipo di immagini possiede solitamente dei cambiamenti piuttosto rapidi dei valori assunti dai vari pixel.
+
+\begin{lstlisting}[language=python]
+def getBlurValue(image):
+    edges = laplacian(image)
+    if edges.var() == 0:
+        return 1
+    return 1 / edges.var()
+\end{lstlisting}
 
 \subsection{Canny}
 
+In maniera completamente analoga alla metrica Laplacian appena vista, con l'operatore Canny \cite{canny} è possibile ricavare una particolare immagine di output che mostra le discontinuità di intensità rilevate. Canny si suddivide in più fasi. Inizialmente all'immagine di partenza viene applicata una convoluzione Gaussiana per rimuovere il rumore, ossia le frequenze più alte, poi tramite un filtro di derivata spaziale come Sobel \cite{sobel} o analoghi esegue il calcolo della derivata prima. Gli spigoli quindi danno origine alle creste presenti nell'immagine gradiente, queste creste vengono prese in considerazione dall'algoritmo che imposta a 0 i pixel che non hanno come valore di cresta massimale. La metrica che poi va a rilevare la sfocatura dell'immagine considera la varianza dell'immagine risultante, questo valore è direttamente proporzionale alla nitidezza ma inversamente proporzionale alla sfocatura perciò se la varianza è nulla il valore di sfocatura (\textit{blurValue}) sarà 0, il che vuol dire che l'immagine è completamente sfocata, se però la varianza è strettamente maggiore allora la metrica ne calcolerà il reciproco in modo che la metrica possa crescere insieme al livello di sfocatura dell'immagine
+
+\begin{lstlisting}[language=python]
+def getBlurValue(image):
+    edges = canny(image)
+    if edges.var() == 0:
+        return 1
+    return 1 / edges.var()
+\end{lstlisting}
+
 \section{Altre metriche}
+
+Da parlare della dimensione assunta dal file jpeg e dalla varianza dell'immagine.
+
+\cite{jpeg}
 
 \chapter{Definizione dei threshold}
 
@@ -233,26 +258,16 @@ Qui spiego come sono stati definiti i boundary per ogni metrica.
 \chapter{Valutazione e confronto delle metriche}
 
 
-
 \chapter{Conclusioni e considerazioni finali}
 
-\cite{sobel}
 
-\cite{canny}
-
-\cite{laplacian}
-
-
-
-
-
-%% Fine dei capitoli normali, inizio dei capitoli-appendice (opzionali)
-\appendix
-
-%\part{Appendici}
-
-\chapter{Titolo della prima appendice}
-Sed purus libero, vestibulum ut nibh vitae, mollis ultricies augue. Pellentesque velit libero, tempor sed pulvinar non, fermentum eu leo. Duis posuere eleifend nulla eget sagittis. Nam laoreet accumsan rutrum. Interdum et malesuada fames ac ante ipsum primis in faucibus. Curabitur eget libero quis leo porttitor vehicula eget nec odio. Proin euismod interdum ligula non ultricies. Maecenas sit amet accumsan sapien.
+% %% Fine dei capitoli normali, inizio dei capitoli-appendice (opzionali)
+% \appendix
+%
+% %\part{Appendici}
+%
+% \chapter{Titolo della prima appendice}
+% Sed purus libero, vestibulum ut nibh vitae, mollis ultricies augue. Pellentesque velit libero, tempor sed pulvinar non, fermentum eu leo. Duis posuere eleifend nulla eget sagittis. Nam laoreet accumsan rutrum. Interdum et malesuada fames ac ante ipsum primis in faucibus. Curabitur eget libero quis leo porttitor vehicula eget nec odio. Proin euismod interdum ligula non ultricies. Maecenas sit amet accumsan sapien.
 
 %% Parte conclusiva del documento; tipicamente per riassunto, bibliografia e/o indice analitico.
 \backmatter
