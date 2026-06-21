@@ -110,7 +110,7 @@ Si vuole realizzare un algoritmo che permetta di determinare se l'obiettivo di u
 
 \section{Presentazione scenario applicativo}
 
-L'infrastruttura aziendale presa in considerazione prevede una serie di telecamera IP, posizionate in punti strategici, raffiguranti delle cisterne contenenti materiale metallico fuso e con su appesa una targa (\textit{plate}) contenente un certo codice. Tramite protocollo RTSP, le telecamere, forniscono un flusso di immagini ad una \textit{pipeline} di riconoscimento di codici. Tali immagini vengono processate dalla \textit{pipeline}, che attraverso una serie livelli di elaborazione riesce ad ottenere il valore numerico associato al codice del \textit{plate}. Tuttavia, non sempre per la \textit{pipeline} è possibile riconoscere tale valore, e questo è dovuto a due motivi principali. Il primo è dato dal fatto che il \textit{plate} non è affatto presente nell'immagine o nell'area presa in considerazione dalla \textit{pipeline}, infatti la procedura che porta al riconoscimento del valore numerico associato al \textit{plate} può essere configurata in modo tale da considerare esclusivamente una sotto-area dell'immagine originale. Il secondo motivo per cui la pipeline non è capace di riconoscere il valore numerico è legato a fenomeni esterni come una scarsa illuminazione, una messa a fuoco dell'immagine precaria, la presenza parziale del \textit{plate} o la stessa dimensione che il quest'ultimo assume nell'immagine complessiva. Un'altra casistica che porta la \textit{pipeline} a fallire è la presenza di sporcizia sull'obiettivo, capita infatti che delle cisterne durante il loro movimento degli schizzi di metallo cadano sull'obiettivo della telecamera andandolo a sporcare. Il riconoscitore viene configurato con un certo limite di affidabilità e in questi casi succede che tale livello non può essere garantito dalla decodifica del codice e ciò comporta un esito negativo da parte dell'intera \textit{pipeline}.
+L'infrastruttura aziendale presa in considerazione prevede una serie di telecamere IP, posizionate in punti strategici, raffiguranti delle cisterne contenenti materiale metallico fuso e con su appesa una targa (\textit{plate}) contenente un certo codice. Tramite protocollo RTSP, le telecamere, forniscono un flusso di immagini ad una \textit{pipeline} di riconoscimento di codici. Tali immagini vengono processate dalla \textit{pipeline}, che attraverso una serie livelli di elaborazione riesce ad ottenere il valore numerico associato al codice del \textit{plate}. Tuttavia, non sempre per la \textit{pipeline} è possibile riconoscere tale valore, e questo è dovuto a due motivi principali. Il primo è dato dal fatto che il \textit{plate} non è affatto presente nell'immagine o nell'area presa in considerazione dalla \textit{pipeline}, infatti la procedura che porta al riconoscimento del valore numerico associato al \textit{plate} può essere configurata in modo tale da considerare esclusivamente una sotto-area dell'immagine originale. Il secondo motivo per cui la pipeline non è capace di riconoscere il valore numerico è legato a fenomeni esterni come una scarsa illuminazione, una messa a fuoco dell'immagine precaria, la presenza parziale del \textit{plate} o la stessa dimensione che il quest'ultimo assume nell'immagine complessiva. Un'altra casistica che porta la \textit{pipeline} a fallire è la presenza di sporcizia sull'obiettivo, capita infatti che delle cisterne durante il loro movimento degli schizzi di metallo cadano sull'obiettivo della telecamera andandolo a sporcare. Il riconoscitore viene configurato con un certo limite di affidabilità e in questi casi succede che tale livello non può essere garantito dalla decodifica del codice e ciò comporta un esito negativo da parte dell'intera \textit{pipeline}.
 
 Per questo motivo è importante poter far affidamento ad un indice che sia indipendente dalla presenza del \textit{plate} all'interno dell'immagine che permetta di valutare se l'obiettivo della telecamera sia in condizioni ottimali. In questo modo sarebbe possibile correggere la ripresa di una telecamera in anticipo e prevenire lunghi periodi di tempo durante i quali la \textit{pipeline} di riconoscimento non valuta alcun valore, ma non perché il codice è assente nell'immagine ma perché l'obiettivo della telecamera non ha la possibilità di fare delle riprese pulite.
 
@@ -259,20 +259,47 @@ Un'altro sistema che si può utilizzare per costruire una metrica che permetta d
 
 \chapter{Definizione dei threshold}
 
-Le metriche che sono state definite offrono un indice numerico che può venire usato per determinare il livello di \textit{blur} di una immagine, ma per stabilere se una immagine sia sfocata o meno bisogna stabilire un limite (\textit{threshold}) al di sopra del quale si può dire con buona approssimazione che l'immagine sia sfocata. Ogni metrica avrà una soglia diversa data la loro natura ma sicuramente sarà un valore $t$ compreso nell'intervallo $[0,1]$. C'è la necessità di capire quindi per una certa immagine, quanto questa possa venire sfocata prima che il riconoscitore dei \textit{plate} dia un errore a causa di uno scarso livello di affidabilità, e sarà proprio questo il limite che rappresenterà il \textit{threshold} $t$. Supponiamo di avere un certo insieme di immagini $I_1,I_2,\dots,I_n$ raffiguranti un \textit{plate} ben visibile, questo insieme rappresenterà il \textit{dataset} da utilizzare per determinare in maniera empirica il valore di $t$. Sia $I_i$ una certa immagine di questo insieme mentre $I^1_i,I^2_i,I^3_i,\dots$ le versioni sfocate con un kernel via via sempre maggiore. Il riconoscitore sarà capace di individuare il codice contenuto nel \textit{plate} fino ad una certa versione $m$, mentre da $m+1$ in poi l'esito del riconoscitore sarà negativo a causa di una scarsa affidabilità data dalla sfocatura eccessiva. Per quella singola immagine otterremo un valore per $t_i$ che sarà il risultato del calcolo del \textit{blur value} $\alpha$ calcolato con la metrica scelta per l'immagine $I_i^m$.
+Le metriche che sono state definite offrono un indice numerico che può venire usato per determinare il livello di \textit{blur} di una immagine, ma per stabilere se una immagine sia sfocata o meno bisogna stabilire un limite (\textit{threshold}) al di sopra del quale si può dire con buona approssimazione che l'immagine sia sfocata, e idealmente al di sotto del quale l'immagine è ancora nitida. 
 
-Una volta ottenuti i valori $t_1,t_2,t_3,\dots,t_n$ derivanti dalle varie immagini si può andare a definire un valore di limite $t$ che permetta di stabilire se una nuova immagine $J$ sia sfocata o no. Un buon modo per determinare $t$ è semplcemente dato dalla media dei risultati ottenuti
+Ogni metrica avrà una soglia diversa sicome si basano su approcci, come è stato mostrato, diversi ma sicuramente sarà un valore $t$ compreso nell'intervallo $[0,1]$. Avremo quindi che $t_{fourier}$ sarà diverso da $t_{skew}$ che a sua volta sarà diverso da $t_{laplacian}$ e così via. In pratica ogni \textit{threshold} $t$ dovrà venire considerato in relazione ad una certa metrica. Supponendo di aver scelto una certa metrica il valore $t$ potrà essere determinato tramite i valori $t_1, t_2, \dots, t_N$ dove $N$ è il numero di telecamere presenti nell'infastruttura aziendale. Ogni telecamera quindi contribuirà al risultato finale offrendo un \textit{threshold} locale $t_i$ che a sua volta sarà determinato dallo studio delle immagini acquisite da tale telecamera. Supponiamo che l'infrastruttura aziendale offra un numero pari a 3 telecamere. Avremo che $N=3$ e quindi avremo a disposizione i valori $t_1,t_2,t_3$ che sono rispettivamente i \textit{threshold} da utilizzare per capire se una immagine è sfocata rispettavamente per la telecamera 1, 2 e 3. Il risultato generale $t$ potrà poi essere ottenuto dalla media:
 
 \begin{equation}
-  t =  \frac{1}{n} \sum_{i=1}^{n} t_i
+t = \frac{t_1 + t_2 + t_3}{3}
 \end{equation}
 
-ma ovviamente è possibile utilizzare diverse altre funzioni come quella di massimo in modo da ridurre al minimo il numero di falsi positivi, ossia immagini nitide che vengono classificate come sfocate. Si può anche fare uso della funzione di minimo, in questo caso ci assicuriamo maggiori probabilità di riconoscere tutte le immagini sfocate a costo di introdurre più falso positivo.
+Più in generale per un numero $N$ di telecamere avremo che:
 
-In questo modo possiamo andare a definire dei $t$ diversi per ogni metrica, che possiamo chiamare $t_{fourier}$, $t_{skew}$, $t_{laplacian}$ e $t_{canny}$.
+\begin{equation}
+  t =  \frac{1}{N} \sum_{i=1}^{N} t_i
+\end{equation}
+
+Supponiamo che ogni telecamere $i$ metta a disposizione un certo numero di immagini $n_i$. Consideriamo la telecamera 10 per esempio, il numero di immagini messe a disposizione da tale ripresa sarà $n_{10}$. Ogni telecamere metterà quindi a disposizione un certo numero di $n_i$ di \textit{funzioni immagine}. Una \textit{funzione immagine} accetta come parametro la dimensione del kernel da usare per sfocare l'immagine e restituisce l'immagine sfocata con il kernel scelto. Quindi $I_i^j(1)$ rappresenta la $j$-esima immagine (con $1\le j \le n_i$) della telecamera $i$ (con $1 \le i \le N$) sfocata con un kernel di dimensione $1$, ossia la $j$-esima immagine ripresa dalla telecamera $i$ nella sua condizione originale. Se volessimo ottenere la $3^a$ immagine della telecamere $10$ sfocata con un kernel di dimensione 29 calcoleremo: $I_{10}^{3}(29)$. Si ricorda che la dimensione del kernel va fornita tramite un numero dispari siccome la matrice kernel che applichera la sfocatura tramite un filtro gaussiano, viene applicata tramite una operazione di convoluzione, in altre parole è necessario avere un valore centrale della matrice siccome questo verrà centrato sul pixel su cui verrà applicata l'operazione. La definizione di questa particolare funzione è importante siccome servirà a formalizzare un modo per ottenere i diversi $t_i$.
+
+A questo punto per ogni telecamera bisognerà considerare le diverse immagini, ogni immagine infatti fornirà un \textit{threshold} indicizzato da $t_{i}^j$ dove $i$ è il numero della telecamera $1 \le i \le N$ e $j$ è il numero dell'immagine $1 \le j \le n_{i}$. Per ottenere $t_i^j$ bisogna calcolare il risultato di $I_i^j(1), I_i^j(3), I_i^j(5) \dots$ e per ognuna di queste immagini via via sempre più sfocate verificare se il riconoscitore riesce o meno a identificare il numero codificato dal \textit{plate}. A partire da una certa dimensione del kernel si osserverà che il riconoscitore fallirà in continuazione, sia $k_i^j$ la dimensione del kernel per cui da $k_i^j+1$ in poi il riconoscitore darà sempre esito negativo i.e. le immagini $I_i^j(k_i^j+1), I_i^j(k_i^j+2), \dots$ non saranno nitide a sufficienza per poter riconoscere il codice del \textit{plate}. Per ottenere $t_i^j$ sarà sufficiente calcolare il \textit{blur value} dell'immagine $I_i^j(k_i^j+1)$:
+
+\begin{equation}
+  t_i^j= \alpha_{I_i^j(k_i^j+1)}
+\end{equation}
+
+dove $\alpha_\xi$ è il \textit{blur value} calcolato con la metrica scelta per l'immagine $\xi$.
+
+Successivamente per ottenere il valore di $t_i$ bisongerà combinare i vari $t_i^j$, una media può andare bene ma altre funzioni come ad esempio la mediana si possono usare se si reputa che nel \textit{dataset} ci siano dei casi particolari che altererebbero in maniera significativa il risultato.
+
+\begin{equation}
+t_i = \frac{1}{n_i} \sum _{j=1} ^{n_i} t_i^j
+\end{equation}
+
+In questo modo possiamo andare a definire dei $t$ diversi per ogni metrica, che possiamo chiamare $t_{fourier}$, $t_{skew}$, $t_{laplacian}$ e $t_{canny}$ e saranno definiti complessivamente dalla formula generica:
+
+\begin{equation}
+  t_m = \frac{1}{N} \sum_{i=1} ^{N} \left ( \frac{1}{n_i} \sum_{j=1} ^{n_i} \alpha_{I_i^j (k_i^j+1)}^m \right )
+\end{equation}
+
+dove $m$ è la metrica di scelta e $\alpha_\xi^m$ rappresenta il \textit{blur value} dell'immagine $\xi$ calcolata tramite la metrica $m$.
 
 \chapter{Valutazione e confronto delle metriche}
 
+Ogni metrica porterà alla definizione di un certo $t$, tale risultato deve essere ottenuto
 
 \chapter{Conclusioni e considerazioni finali}
 
