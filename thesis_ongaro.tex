@@ -1,5 +1,3 @@
-%% Le lingue utilizzate, che verranno passate come opzioni al pacchetto babel. Come sempre, l'ultima indicata sarà quella primaria.
-%% Se si utilizzano una o più lingue diverse da "italian" o "english", leggere le istruzioni in fondo.
 \def\thudbabelopt{english,italian}
 %% Valori ammessi per target: bach (tesi triennale), mst (tesi magistrale), phd (tesi di dottorato).
 %% Valori ammessi per aauheader: '' (vuoto -> nessun header Alpen Adria Univeristat), aics (Department of Artificial Intelligence and Cybersecurity), informatics (Department of Informatics Systems). Il nome del dipartimento è allineato con la versione inglese del logo UniUD.
@@ -7,28 +5,30 @@
 \documentclass[target=bach,aauheader=,style=]{thud}
 
 %% --- Informazioni sulla tesi ---
-%% Per tutti i tipi di tesi
-% Scommentare quello di interesse, o mettete quello che vi pare
 \course{Informatica}
-%\course{Internet of Things, Big Data e Web}
-%\course{Matematica}
-%\course{Comunicazione Multimediale e Tecnologie dell'Informazione}
 \title{Utilizzo di telecamere \\ in ambienti industriali reali}
 \author{Michele Ongaro}
 \supervisor{Prof.\ Agostino Dovier}
-% \cosupervisor{Arch.\ Rambaldo Melandri \and Dott.\ Giorgio Perozzi}
 \tutor{Ing. Umberto Piconi}
 \usepackage{graphicx} % Per immagini
-\usepackage{float}
+\usepackage{float} % Per immagini
 \usepackage{listings} % scrivere codice
-\usepackage{xcolor}
-\usepackage{amsmath}
+\usepackage{xcolor} % colorare il codice
+\usepackage{amsmath} % usare la funzione \text{} nelle formule
+\usepackage[a-1b]{pdfx} % per generare il PDF/A per l'archiviazione. Necessario solo per la versione finale
+\usepackage[pdfa]{hyperref} % hyperref: Regola le impostazioni della creazione del PDF... più tante altre cose. Ricordarsi di usare l'opzione pdfa.
+%% tocbibind: Inserisce nell'indice anche la lista delle figure, la bibliografia, ecc.
+
+%% --- Stili di pagina disponibili (comando \pagestyle) ---
+%% sfbig (predefinito): Apertura delle parti e dei capitoli col numero grande; titoli delle parti e dei capitoli e intestazioni di pagina in sans serif.
+%% big: Come "sfbig", solo serif.
+%% plain: Apertura delle parti e dei capitoli tradizionali di LaTeX; intestazioni di pagina come "big".
+\pagestyle{big}
 
 \definecolor{codegreen}{rgb}{0,0.6,0}
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}
 \definecolor{codepurple}{rgb}{0.58,0,0.82}
 \definecolor{backcolour}{rgb}{0.95,0.95,0.92}
-
 
 \lstdefinestyle{mystyle}{
     backgroundcolor=\color{backcolour},
@@ -50,25 +50,6 @@
 }
 
 \lstset{style=mystyle}
-%% Campi obbligatori: \title, \author e \course.
-%% Altri campi disponibili: \reviewer, \tutor, \chair, \date (anno accademico, calcolato in automatico), \rights
-%% Con \supervisor, \cosupervisor, \reviewer e \tutor si possono indicare più nomi separati da \and.
-%% Per le sole tesi di dottorato:
-% \phdnumber{313}
-% \cycle{XXVIII}
-% \contacts{Via della Sintassi Astratta, 0/1\\65536 Gigatera --- Italia\\+39 0123 456789\\\texttt{http://www.example.com}\\\texttt{inbox@example.com}}
-
-%% --- Pacchetti consigliati ---
-%% pdfx: per generare il PDF/A per l'archiviazione. Necessario solo per la versione finale
-\usepackage[a-1b]{pdfx}
-%% hyperref: Regola le impostazioni della creazione del PDF... più tante altre cose. Ricordarsi di usare l'opzione pdfa.
-\usepackage[pdfa]{hyperref}
-%% tocbibind: Inserisce nell'indice anche la lista delle figure, la bibliografia, ecc.
-
-%% --- Stili di pagina disponibili (comando \pagestyle) ---
-%% sfbig (predefinito): Apertura delle parti e dei capitoli col numero grande; titoli delle parti e dei capitoli e intestazioni di pagina in sans serif.
-%% big: Come "sfbig", solo serif.
-%% plain: Apertura delle parti e dei capitoli tradizionali di LaTeX; intestazioni di pagina come "big".
 
 \begin{document}
 \maketitle
@@ -362,28 +343,14 @@ Se si desidare avere un confronto più mirato è possibile gestire il test in ma
 
 È stato mostrato come implementare e configurare un algoritmo che permetta di determinare se una immagine e più in generale un video sia stato prodotto da una telecamera con un obiettivo sporco. Sono state illustrate diverse tecniche che si possono utilizzare per il rilevamento di un certo valore chiamato \textit{blur value} utilizzato per determinare se una certa immagine sia sfocata o meno se confrontato un un certo valore di \textit{threshold} indicato da $t$ unico a ogni metrica. Tale informazione può venire usata per eseguire della manutenzione preventiva sulle telecamere con obiettivo sporco in modo tale da rendere efficiente e produttivo il sistema di rilevamento codici dei \textit{plate} posizionati sulle varie cisterne.
 
-% %% Fine dei capitoli normali, inizio dei capitoli-appendice (opzionali)
-% \appendix
-%
-% %\part{Appendici}
-%
-% \chapter{Titolo della prima appendice}
-% Sed purus libero, vestibulum ut nibh vitae, mollis ultricies augue. Pellentesque velit libero, tempor sed pulvinar non, fermentum eu leo. Duis posuere eleifend nulla eget sagittis. Nam laoreet accumsan rutrum. Interdum et malesuada fames ac ante ipsum primis in faucibus. Curabitur eget libero quis leo porttitor vehicula eget nec odio. Proin euismod interdum ligula non ultricies. Maecenas sit amet accumsan sapien.
-
 %% Parte conclusiva del documento; tipicamente per riassunto, bibliografia e/o indice analitico.
 \backmatter
 
-%% Riassunto (opzionale)
-%\summary
-%Maecenas tempor elit sed arcu commodo, dapibus sagittis leo egestas. Praesent at ultrices urna. Integer et nibh in augue mollis facilisis sit amet eget magna. Fusce at porttitor sapien. Phasellus imperdiet, felis et molestie vulputate, mauris sapien tincidunt justo, in lacinia velit nisi nec ipsum. Duis elementum pharetra lorem, ut pellentesque nulla congue et. Sed eu venenatis tellus, pharetra cursus felis. Sed et luctus nunc. Aenean commodo, neque a aliquam bibendum, mauris augue fringilla justo, et scelerisque odio mi sit amet diam. Nulla at placerat nibh, nec rutrum urna. Donec ut egestas magna. Aliquam erat volutpat. Phasellus vestibulum justo sed purus mattis, vitae lacinia magna viverra. Nulla rutrum diam dui, vel semper mi mattis ac. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Donec id vestibulum lectus, eget tristique est.
 
 %% Bibliografia (praticamente obbligatoria)
-\bibliographystyle{plain_\languagename}%% Carica l'omonimo file .bst, dove \languagename è la lingua attiva.
+\bibliographystyle{plain_\languagename}
 %% Nel caso in cui si usi un file .bib (consigliato)
 \bibliography{thud}
-%% Nel caso di bibliografia manuale, usare l'environment thebibliography.
-
-%% Per l'indice analitico, usare il pacchetto makeidx (o analogo).
 
 \end{document}
 
@@ -399,7 +366,7 @@ Per ogni nuova lingua utilizzata aggiungere nel preambolo il seguente spezzone:
         \def\cosupervisorname{Co-relatore}%
         \def\cosupervisorsname{Co-relatori}%
         \def\cyclename{Ciclo}%
-        \def\datename{Anno accademico}%
+        \def\datename{Anno accademico}
         \def\indexname{Indice analitico}%
         \def\institutecontactsname{Contatti dell'Istituto}%
         \def\introductionname{Introduzione}%
