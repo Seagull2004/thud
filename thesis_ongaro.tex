@@ -410,27 +410,29 @@ Nel complesso, i risultati suggeriscono che le metriche basate sull'analisi dell
 
 \chapter{Conclusioni e considerazioni finali}
 
-Arrivati a questo punto è facile generare un algoritmo che permetta di classificare delle immagini non presenti nel dataset come sfocate o meno. Sia $J^i$ una immagine acquisita dalla telecamera $i$, per capire se tale immagine sia stata scattata da un obiettivo sporco o meno è sufficiente eseguire un confronto tra il suo \textit{blur value} $\alpha$ e quello ottenuto $t$.
+Nel presente lavoro è stato sviluppato un approccio per la rilevazione automatica dello stato di pulizia dell'obiettivo delle telecamere, basato sull'analisi del livello di sfocatura delle immagini acquisite. L'idea generale è quella di utilizzare un indice numerico, il cosiddetto \textit{blur value} $\alpha$, per stimare la qualità dell'immagine e, indirettamente, individuare la presenza di sporco sull'obiettivo. A partire dalle metriche introdotte nei capitoli precedenti, ogni immagine può essere associata a un valore $\alpha$ che descrive il suo grado di nitidezza. Per rendere tale informazione utilizzabile in modo decisionale, è stato introdotto un valore di soglia $t^m$ (dipendente dalla metrica scelta), che rappresenta il confine tra immagini considerate accettabili e immagini considerate sfocate. Sia $J^i$ un'immagine acquisita dalla telecamera $i$. Il problema della classificazione può essere quindi formulato come un semplice confronto tra il valore della metrica e il threshold associato:
 
 \begin{equation}
 \text{dirtTest}(J^i) = 
 \begin{cases}
-  \text{True} & t^m < \alpha_{J^i}^m  \\
+  \text{True} & \alpha_{J^i}^m > t^m \\
   \text{False} & \text{else}
 \end{cases}
 \end{equation}
 
-Se si desidera avere un confronto più mirato è possibile gestire il test in maniera locale per ogni telecamera usando il valore di \textit{threshold} ottenuto dalla specifica telecamera:
+In questo contesto, il valore \textit{True} indica la presenza di una condizione anomala, tipicamente associata a un'immagine eccessivamente sfocata e quindi potenzialmente causata da sporco sull'obiettivo. Al contrario, il valore \textit{False} indica che l'immagine rientra nelle condizioni operative normali. Oltre alla soglia globale $t^m$, è possibile adottare una strategia più fine che tiene conto delle differenze tra le singole telecamere. In questo caso, viene utilizzato il threshold locale $t_i$, specifico per ciascuna telecamera, ottenuto durante la fase di calibrazione:
 
 \begin{equation}
 \text{dirtTest}(J^i) = 
 \begin{cases}
-  \text{True} & t_i < \alpha_{J^i}^m \\
+  \text{True} & \alpha_{J^i}^m > t_i \\
   \text{False} & \text{else}
 \end{cases}
 \end{equation}
 
-È stato mostrato come implementare e configurare un algoritmo che permetta di determinare se una immagine e più in generale un video sia stato prodotto da una telecamera con un obiettivo sporco. Sono state illustrate diverse tecniche che si possono utilizzare per il rilevamento di un certo valore chiamato \textit{blur value} utilizzato per determinare se una certa immagine sia sfocata o meno se confrontato con un certo valore di \textit{threshold} indicato da $t$ unico a ogni metrica. Tale informazione può venire usata per eseguire della manutenzione preventiva sulle telecamere con obiettivo sporco in modo tale da rendere efficiente e produttivo il sistema di rilevamento codici dei \textit{plate} posizionati sulle varie cisterne.
+Questo secondo approccio consente di adattare la decisione alle caratteristiche specifiche di ogni punto di ripresa, riducendo l'effetto delle differenze di installazione e migliorando la coerenza della classificazione.
+
+Nel complesso, il lavoro ha mostrato come sia possibile costruire un sistema completo per il monitoraggio dello stato delle telecamere utilizzando esclusivamente l'analisi delle immagini e senza la necessità di sensori aggiuntivi. Sono state analizzate diverse famiglie di metriche per la stima del \textit{blur value}, basate sia sul dominio delle frequenze che su tecniche di \textit{edge detection}, oltre ad alcune soluzioni alternative più semplici. L'integrazione di queste metriche con un processo di calibrazione basato sui dati reali dell'infrastruttura ha permesso di definire soglie operative coerenti e utilizzabili in un contesto industriale. In questo modo, il sistema non si limita a rilevare la sfocatura, ma può essere impiegato come strumento di supporto alla manutenzione preventiva. In particolare, la possibilità di individuare in anticipo il degrado delle condizioni dell'obiettivo consente di intervenire prima che la qualità delle immagini comprometta il funzionamento della pipeline di riconoscimento dei codici sui \textit{plate}. Questo si traduce in una maggiore affidabilità complessiva del sistema e in una riduzione dei tempi di inattività dovuti a problemi non immediatamente evidenti.
 
 %% Parte conclusiva del documento; tipicamente per riassunto, bibliografia e/o indice analitico.
 \backmatter
