@@ -126,17 +126,28 @@ L'ipotesi alla base delle metriche presentate in questa sezione è quindi la seg
 
 \subsection{Fourier}
 
-Questa metrica sfrutta il posizionamento dei valori della matrice di Fourier \cite{fourier} per determinare le frequenze basse e alte presenti nell'immagine. Dopo aver computato la matrice di Fourier, avremo a disposizione dei numeri complessi che rappresentano lo spettro dell'immagine considerata. In posizione centrale a questa matrice troveremo la frequenza 0, e mano a mano che ci spostiamo sulla periferia avremo a disposizione le frequenze più basse. Per ognuno di questi numeri complessi andiamo a calcolare il modulo e lo andiamo a salvare in una matrice di dimensioni analoghe. Consideriamo poi la sommatoria delle frequenze basse e alte considerando "basse" le frequenze che si trovano all'interno di un cerchio avente raggio pari al 10\% del valore minore tra altezza e larghezza della matrice di Fourier, le frequenze "alte" saranno tutte le altre. L'indice $\alpha$ poi considererà il rapporto che c'è tra queste due sommatorie:
+La prima metrica considerata si basa sull'analisi dello spettro delle frequenze ottenuto tramite la Trasformata Discreta di Fourier (DFT) \cite{fourier}. L'idea alla base di questo approccio è quella di valutare come l'energia dell'immagine sia distribuita tra le componenti a bassa e ad alta frequenza.
+
+Come discusso nella sezione precedente, le immagini nitide tendono a contenere una quantità maggiore di componenti ad alta frequenza, associate alla presenza di dettagli, contorni e variazioni rapide di intensità. Al contrario, la sfocatura agisce come un filtro passa-basso, attenuando progressivamente tali componenti e concentrando gran parte dell'energia dell'immagine nelle frequenze più basse. Per effettuare questa analisi si applica innanzitutto la Trasformata Discreta di Fourier all'immagine pre-processata. Il risultato è una matrice di numeri complessi che rappresenta lo spettro delle frequenze dell'immagine. Ciascun elemento della matrice descrive il contributo di una specifica frequenza alla formazione dell'immagine originale. Dopo aver eseguito l'operazione di \textit{shift} della trasformata, la componente a frequenza nulla (detta anche componente continua o \textit{DC}) viene posizionata al centro della matrice. Procedendo radialmente verso l'esterno si incontrano frequenze via via più elevate. In altre parole, il centro della matrice rappresenta le basse frequenze, mentre le regioni periferiche contengono le componenti ad alta frequenza. Poiché i valori restituiti dalla trasformata sono numeri complessi, per ogni elemento viene calcolato il modulo. In questo modo si ottiene una matrice contenente esclusivamente valori reali positivi, comunemente indicata come \textit{magnitude spectrum}. Tali valori rappresentano l'intensità con cui ciascuna frequenza contribuisce all'immagine. Una volta ottenuta la matrice dei moduli, si procede alla separazione delle frequenze basse da quelle alte. A tale scopo viene definita una regione circolare centrata nello spettro e avente raggio pari al 10\% della dimensione minima tra altezza e larghezza dell'immagine. Tutte le frequenze contenute all'interno di questo cerchio vengono considerate basse frequenze, mentre tutte quelle esterne vengono considerate alte frequenze.
+
+Indicando con $\Omega$ l'insieme di tutte le componenti della trasformata di Fourier e con $\Omega_{\text{low}}$ il sottoinsieme delle basse frequenze, viene definito il seguente indice:
 
 \begin{equation}
-\alpha = \frac{\sum_{ f\in \Omega_\text{low} } || f ||}{\sum_{ f\in \Omega }^{  } || f ||}
+\alpha = \frac{\sum_{f \in \Omega_{\text{low}}} ||f||}{\sum_{f \in \Omega} ||f||}
 \end{equation}
 
-Dove $ \alpha $ è il \textit{blur value}, $ \Omega $ è la trasformata di fourier e $\Omega_\text{low}$ sono i valori della trasformata di fourier per le frequenze più basse.
+dove:
 
-$\alpha$ è un valore che sta tra 0 e 1, se il denominatore è più grande rispetto al numeratore significa che saranno presenti contributi significativi dalle frequenze più alte e quindi l'immagine sarà più nitida e il \textit{blur value} si muoverà verso lo 0, via via che l'immagine diventa più sfocata i contributi delle frequenze più alte diminuiranno e il rapporto si avvicinerà a 1.
+\begin{itemize}
+    \item $\alpha$ rappresenta il valore di sfocatura (\textit{blur value});
+    \item $\Omega$ è l'insieme di tutte le componenti della trasformata di Fourier;
+    \item $\Omega_{\text{low}}$ contiene esclusivamente le componenti associate alle basse frequenze;
+    \item $||f||$ indica il modulo della componente complessa $f$.
+\end{itemize}
 
-Lo pseudo codice che implementa questa metrica è il seguente:
+L'indice $\alpha$ assume valori compresi tra 0 e 1 e può essere interpretato come la frazione di energia concentrata nelle basse frequenze. Quando l'immagine è nitida, una parte significativa dell'energia è distribuita anche nelle frequenze più elevate. In questo caso il denominatore risulta molto maggiore del numeratore e il valore di $\alpha$ tende ad assumere valori relativamente bassi. Al contrario, quando l'immagine è sfocata, il contenuto ad alta frequenza diminuisce sensibilmente e la maggior parte dell'energia si concentra nelle basse frequenze. Di conseguenza il numeratore e il denominatore assumono valori sempre più simili e l'indice $\alpha$ tende ad avvicinarsi a 1. Ne consegue che valori bassi di $\alpha$ sono generalmente associati ad immagini nitide, mentre valori elevati indicano una probabile perdita di messa a fuoco.
+
+Lo pseudocodice riportato di seguito descrive l'implementazione della metrica.
 
 \begin{lstlisting}[language=python]
 def getBlurValue(image):
@@ -151,18 +162,18 @@ def getBlurValue(image):
     return low / (high + low)
 \end{lstlisting}
 
-Le immagini che seguono sono una rappresentazione della trasformata di Fourier di due immagini che differiscono nella loro nitidezza. Si può notare che nella prima il maggior valore dei moduli si trova nel centro, dove vengono posizionate le frequenze più basse, al contrario nella seconda osserviamo moduli più alti in corrispondenza delle frequenze più alte.
+Le Figure successive mostrano la rappresentazione della magnitude della trasformata di Fourier per due immagini caratterizzate da un diverso livello di nitidezza. Nel caso dell'immagine sfocata, gran parte dell'energia risulta concentrata nella regione centrale dello spettro. Questo comportamento indica una predominanza delle basse frequenze e una ridotta presenza di dettagli ad alta frequenza. Al contrario, nell'immagine nitida si osserva una distribuzione più ampia dell'energia anche nelle regioni periferiche della trasformata. La presenza di contributi significativi alle alte frequenze è infatti direttamente collegata alla presenza di dettagli e contorni ben definiti nella scena originale.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\textwidth]{./img/fourier-blurry.png}
-    \caption{Magnitude della FFT per una immagine sfocata}
+    \caption{Magnitude della trasformata di Fourier per un'immagine sfocata. L'energia risulta prevalentemente concentrata nelle basse frequenze.}
 \end{figure}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\textwidth]{./img/fourier-sharp.png}
-    \caption{Magnitude della FFT per una immagine nitida}
+    \caption{Magnitude della trasformata di Fourier per un'immagine nitida. Si osserva una maggiore presenza di componenti ad alta frequenza rispetto al caso precedente.}
 \end{figure}
 
 \subsection{Skewness}
