@@ -183,11 +183,7 @@ Questa è la seconda metrica che si basa sull'analisi della distribuzione delle 
 Per quantificare questo fenomeno si parte, come nel caso della metrica precedente, dalla Trasformata Discreta di Fourier dell'immagine. Dopo aver calcolato il modulo di ciascuna componente complessa, si ottiene la matrice delle magnitudini che rappresenta l'intensità delle diverse frequenze presenti nell'immagine. A questo punto non si effettua una semplice separazione tra frequenze basse e frequenze alte, ma si costruisce una vera e propria distribuzione delle frequenze. Per fare ciò vengono considerati una serie di cerchi concentrici centrati nella frequenza nulla, posta al centro dello spettro di Fourier. Ogni cerchio rappresenta una determinata distanza dal centro e quindi una specifica banda di frequenze. Per ciascun raggio viene calcolata la somma delle magnitudini appartenenti alla relativa corona circolare. Ripetendo questa operazione per tutti i raggi si ottiene una sequenza di valori che descrive come l'energia dell'immagine è distribuita al variare della frequenza. Dal punto di vista intuitivo, una distribuzione di questo tipo può essere interpretata come un istogramma radiale dello spettro di Fourier. I primi valori della sequenza rappresentano il contributo delle basse frequenze, mentre i valori successivi descrivono il contributo delle frequenze progressivamente più elevate. Una volta costruita la distribuzione, viene calcolato il coefficiente di \textit{skewness}. Nel presente lavoro è stata utilizzata la formula di Pearson:
 
 \begin{equation}
-\text{Pearson's median skewness}
-=
-3 \cdot
-\frac{\text{Mean} - \text{Median}}
-{\text{Standard deviation}}
+\text{Pearson's median skewness} = 3 \cdot \frac{\text{Mean} - \text{Median}} {\text{Standard deviation}}
 \end{equation}
 
 Il valore ottenuto fornisce una misura dell'asimmetria della distribuzione. Un valore positivo indica una distribuzione \textit{right-skewed}, ovvero caratterizzata da una coda estesa verso destra. Un valore negativo indica una distribuzione \textit{left-skewed}, ovvero caratterizzata da una coda estesa verso sinistra. Un valore prossimo a zero indica una distribuzione sostanzialmente simmetrica. Nel caso delle immagini analizzate ci si aspetta generalmente una distribuzione \textit{right-skewed}. Questo comportamento deriva dal fatto che le basse frequenze contribuiscono naturalmente in misura maggiore rispetto alle alte frequenze. Quando l'immagine diventa sfocata tale fenomeno si accentua ulteriormente, poiché una quota sempre più elevata dell'energia si concentra nelle regioni centrali dello spettro. Di conseguenza, la distribuzione associata ad un'immagine sfocata tende ad essere più asimmetrica rispetto a quella ottenuta da un'immagine nitida. In altre parole, all'aumentare della sfocatura ci si aspetta un incremento del coefficiente di \textit{skewness}.
@@ -244,8 +240,7 @@ La prima metrica appartenente alla categoria delle tecniche basate sull'\textit{
 L'operatore Laplacian consente di evidenziare proprio queste variazioni locali. Dal punto di vista matematico, esso calcola la seconda derivata spaziale dell'immagine, mettendo in risalto le regioni in cui l'intensità luminosa subisce cambiamenti significativi. Le aree uniformi tendono ad assumere valori prossimi allo zero, mentre i bordi e le strutture più definite producono valori di maggiore intensità. Applicando il filtro Laplacian ad un'immagine si ottiene quindi una nuova immagine nella quale i contorni risultano evidenziati. A questo punto è possibile analizzare la distribuzione dei valori ottenuti per ricavare una misura della nitidezza. Nel presente lavoro viene utilizzata la varianza dell'immagine filtrata come indicatore della quantità di dettagli presenti nella scena. La varianza misura infatti quanto i valori risultanti dal filtro siano dispersi rispetto al loro valore medio. Quando l'immagine è nitida, il filtro Laplacian produce generalmente valori molto differenti tra loro: le aree contenenti bordi generano risposte elevate, mentre le regioni uniformi producono valori prossimi allo zero. Questa elevata variabilità si traduce in una varianza elevata. Al contrario, quando l'immagine è sfocata, i contorni risultano attenuati e la risposta del filtro diventa più uniforme. I valori generati dal Laplacian tendono quindi ad essere meno dispersi e la varianza assume valori inferiori. La varianza della risposta del Laplacian può quindi essere interpretata come una misura diretta della quantità di dettagli presenti nell'immagine. Maggiore è la varianza, maggiore è la probabilità che l'immagine sia correttamente focalizzata. Per ottenere un indice che cresca all'aumentare della sfocatura viene utilizzato l'inverso della varianza:
 
 \begin{equation}
-\alpha =
-\frac{1}{\mathrm{Var}(L)}
+\alpha = \frac{1}{\mathrm{Var}(L)}
 \end{equation}
 
 dove:
@@ -286,8 +281,7 @@ La prima fase dell'algoritmo consiste nell'applicazione di un filtro Gaussiano a
 Una volta ottenuta la mappa dei contorni, il principio utilizzato è del tutto analogo a quello adottato per la metrica Laplacian. Viene infatti calcolata la varianza dell'immagine risultante, assumendo che una maggiore dispersione dei valori sia indicativa di una maggiore presenza di dettagli e quindi di una migliore messa a fuoco. Nel caso di un'immagine nitida, il rilevatore di Canny individua generalmente un numero elevato di contorni ben definiti. La presenza di tali strutture produce una distribuzione dei valori maggiormente dispersa e quindi una varianza più elevata. Quando invece l'immagine è sfocata, le transizioni di intensità risultano attenuate e molti bordi non vengono più rilevati. L'immagine risultante contiene quindi meno informazioni strutturali e la varianza tende a diminuire. Per ottenere un indice che cresca all'aumentare della sfocatura, viene utilizzato l'inverso della varianza:
 
 \begin{equation}
-\alpha =
-\frac{1}{\mathrm{Var}(C)}
+\alpha = \frac{1}{\mathrm{Var}(C)}
 \end{equation}
 
 dove:
@@ -332,43 +326,47 @@ Un'ulteriore metrica, concettualmente più semplice ma altrettanto intuitiva, co
 
 \section{Calcolo del threshold}
 
-Le metriche che sono state definite offrono un indice numerico che può venire usato per determinare il livello di \textit{blur} di una immagine, ma per stabilere se una immagine sia sfocata o meno bisogna stabilire un limite (\textit{threshold}) al di sopra del quale si può dire con buona approssimazione che l'immagine sia sfocata, e idealmente al di sotto del quale l'immagine è ancora nitida. 
-
-Ogni metrica avrà una soglia diversa sicome si basano su approcci, come è stato mostrato, diversi ma sicuramente sarà un valore $t$ compreso nell'intervallo $[0,1]$. Avremo quindi che $t_{fourier}$ sarà diverso da $t_{skew}$ che a sua volta sarà diverso da $t_{laplacian}$ e così via. In pratica ogni \textit{threshold} $t$ dovrà venire considerato in relazione ad una certa metrica. Supponendo di aver scelto una certa metrica il valore $t$ potrà essere determinato tramite i valori $t_1, t_2, \dots, t_N$ dove $N$ è il numero di telecamere presenti nell'infastruttura aziendale. Ogni telecamera quindi contribuirà al risultato finale offrendo un \textit{threshold} locale $t_i$ che a sua volta sarà determinato dallo studio delle immagini acquisite da tale telecamera. Supponiamo che l'infrastruttura aziendale offra un numero pari a 3 telecamere. Avremo che $N=3$ e quindi avremo a disposizione i valori $t_1,t_2,t_3$ che sono rispettivamente i \textit{threshold} da utilizzare per capire se una immagine è sfocata rispettavamente per la telecamera 1, 2 e 3. Il risultato generale $t$ potrà poi essere ottenuto dalla media:
+Le metriche introdotte nel capitolo precedente forniscono un valore numerico che quantifica il livello di sfocatura di un'immagine. Tuttavia, per poter utilizzare tali valori in modo decisionale, è necessario definire una soglia (\textit{threshold}) che consenta di discriminare tra immagini nitide e immagini sfocate. In generale, un'immagine verrà classificata come sfocata se il valore della metrica supera una determinata soglia $t$, mentre verrà considerata accettabile (cioè sufficientemente nitida) se il valore rimane al di sotto di tale soglia. È importante sottolineare che ogni metrica definisce una propria scala di valori e, di conseguenza, richiede una soglia specifica. In altre parole, avremo valori distinti come $t_{fourier}$, $t_{skew}$, $t_{laplacian}$ e $t_{canny}$, ciascuno associato alla metrica corrispondente. Il problema della definizione del threshold non può essere risolto in modo globale, ma deve essere affrontato tenendo conto delle caratteristiche dell'infrastruttura e dei dati disponibili. In particolare, nel contesto considerato, il valore della soglia viene stimato a partire da più telecamere presenti nell'impianto. Sia $N$ il numero di telecamere disponibili. Per ogni telecamera $i$ (con $1 \le i \le N$) è possibile stimare un valore locale di soglia $t_i$, ottenuto analizzando le immagini acquisite da quella specifica telecamera. Il valore globale della soglia $t$ viene quindi calcolato come media dei contributi delle singole telecamere:
 
 \begin{equation}
-t = \frac{t_1 + t_2 + t_3}{3}
+t = \frac{1}{N} \sum_{i=1}^{N} t_i
 \end{equation}
 
-Più in generale per un numero $N$ di telecamere avremo che:
+In questo modo si assume che ogni telecamera contribuisca in modo equivalente alla definizione del threshold globale. Questa scelta permette di ottenere un valore robusto e rappresentativo dell'intero sistema. Per costruire il valore $t_i$ è necessario analizzare più immagini provenienti dalla stessa telecamera. Sia $n_i$ il numero di immagini associate alla telecamera $i$. Ogni immagine viene indicizzata come $I_i^j$, dove $j$ indica il numero dell'immagine con $1 \le j \le n_i$. Per ogni immagine $I_i^j$ si definisce una funzione parametrica $I_i^j(k)$, che rappresenta la stessa immagine sottoposta a un processo di sfocatura artificiale mediante un kernel di dimensione $k$. In particolare, $I_i^j(1)$ rappresenta l'immagine originale, mentre all'aumentare di $k$ l'immagine risulta progressivamente più sfocata. La funzione $I_i^j(k)$ è definita solo per valori dispari di $k$, poiché il kernel utilizzato nella convoluzione deve avere un elemento centrale ben definito. Questo è necessario per garantire che l'operazione di convoluzione possa essere applicata correttamente su ogni pixel dell'immagine. Per ogni immagine $I_i^j$ si individua un valore critico $k_i^j$, tale che:
+
+\begin{itemize}
+    \item per kernel di dimensione fino a $k_i^j$, il sistema di riconoscimento del \textit{plate} riesce ancora a decodificare correttamente il codice;
+    \item per kernel di dimensione maggiore di $k_i^j$, il sistema fallisce in modo sistematico nel riconoscimento del codice.
+\end{itemize}
+
+In altre parole, $k_i^j$ rappresenta il punto di transizione tra condizioni di riconoscimento affidabile e condizioni di fallimento dovute alla sfocatura. A partire da questo valore, si definisce il threshold locale dell'immagine come il valore di sfocatura associato alla prima condizione di fallimento, cioè:
 
 \begin{equation}
-  t =  \frac{1}{N} \sum_{i=1}^{N} t_i
+t_i^j = \alpha_{I_i^j(k_i^j + 1)}
 \end{equation}
 
-Supponiamo che ogni telecamere $i$ metta a disposizione un certo numero di immagini $n_i$. Consideriamo la telecamera 10 per esempio, il numero di immagini messe a disposizione da tale ripresa sarà $n_{10}$. Ogni telecamere metterà quindi a disposizione un certo numero di $n_i$ di \textit{funzioni immagine}. Una \textit{funzione immagine} accetta come parametro la dimensione del kernel da usare per sfocare l'immagine e restituisce l'immagine sfocata con il kernel scelto. Quindi $I_i^j(1)$ rappresenta la $j$-esima immagine (con $1\le j \le n_i$) della telecamera $i$ (con $1 \le i \le N$) sfocata con un kernel di dimensione $1$, ossia la $j$-esima immagine ripresa dalla telecamera $i$ nella sua condizione originale. Se volessimo ottenere la $3^a$ immagine della telecamere $10$ sfocata con un kernel di dimensione 29 calcoleremo: $I_{10}^{3}(29)$. Si ricorda che la dimensione del kernel va fornita tramite un numero dispari siccome la matrice kernel che applichera la sfocatura tramite un filtro gaussiano, viene applicata tramite una operazione di convoluzione, in altre parole è necessario avere un valore centrale della matrice siccome questo verrà centrato sul pixel su cui verrà applicata l'operazione. La definizione di questa particolare funzione è importante siccome servirà a formalizzare un modo per ottenere i diversi $t_i$.
-
-A questo punto per ogni telecamera bisognerà considerare le diverse immagini, ogni immagine infatti fornirà un \textit{threshold} indicizzato da $t_{i}^j$ dove $i$ è il numero della telecamera $1 \le i \le N$ e $j$ è il numero dell'immagine $1 \le j \le n_{i}$. Per ottenere $t_i^j$ bisogna calcolare il risultato di $I_i^j(1), I_i^j(3), I_i^j(5) \dots$ e per ognuna di queste immagini via via sempre più sfocate verificare se il riconoscitore riesce o meno a identificare il numero codificato dal \textit{plate}. A partire da una certa dimensione del kernel si osserverà che il riconoscitore fallirà in continuazione, sia $k_i^j$ la dimensione del kernel per cui da $k_i^j+1$ in poi il riconoscitore darà sempre esito negativo i.e. le immagini $I_i^j(k_i^j+1), I_i^j(k_i^j+2), \dots$ non saranno nitide a sufficienza per poter riconoscere il codice del \textit{plate}. Per ottenere $t_i^j$ sarà sufficiente calcolare il \textit{blur value} dell'immagine $I_i^j(k_i^j+1)$:
+dove $\alpha_{\xi}$ rappresenta il valore di \textit{blur} calcolato sull'immagine $\xi$ tramite la metrica scelta. Questo approccio consente di collegare direttamente il valore della metrica alla reale capacità del sistema di riconoscimento di funzionare correttamente. Una volta ottenuti tutti i valori $t_i^j$ per una singola telecamera, il threshold associato alla telecamera $i$ viene calcolato come media:
 
 \begin{equation}
-  t_i^j= \alpha_{I_i^j(k_i^j+1)}
+t_i = \frac{1}{n_i} \sum_{j=1}^{n_i} t_i^j
 \end{equation}
 
-dove $\alpha_\xi$ è il \textit{blur value} calcolato con la metrica scelta per l'immagine $\xi$.
+In alternativa alla media, è possibile utilizzare operatori più robusti come la mediana, nel caso in cui il dataset contenga valori anomali che potrebbero influenzare eccessivamente il risultato finale.
 
-Successivamente per ottenere il valore di $t_i$ bisognerà combinare i vari $t_i^j$, una media può andare bene ma altre funzioni come ad esempio la mediana si possono usare se si reputa che nel \textit{dataset} ci siano dei casi particolari che altererebbero in maniera significativa il risultato.
+Infine, combinando i contributi di tutte le telecamere si ottiene il threshold globale associato a una specifica metrica $m$:
 
 \begin{equation}
-t_i = \frac{1}{n_i} \sum _{j=1} ^{n_i} t_i^j
+  t^m = \frac{1}{N} \sum_{i=1}^{N} \left ( \frac{1}{n_i} \sum_{j=1}^{n_i} \alpha_{I_i^j (k_i^j+1)}^m \right )
 \end{equation}
 
-In questo modo possiamo andare a definire dei $t$ diversi per ogni metrica, che possiamo chiamare $t^{fourier}$, $t^{skew}$, $t^{laplacian}$ e $t^{canny}$ e saranno definiti complessivamente dalla formula generica:
+dove:
+\begin{itemize}
+    \item $m$ identifica la metrica utilizzata;
+    \item $\alpha_{\xi}^m$ rappresenta il valore di sfocatura dell'immagine $\xi$ calcolato con la metrica $m$;
+    \item $t^m$ è il threshold finale associato alla metrica $m$.
+\end{itemize}
 
-\begin{equation}
-  t^m = \frac{1}{N} \sum_{i=1} ^{N} \left ( \frac{1}{n_i} \sum_{j=1} ^{n_i} \alpha_{I_i^j (k_i^j+1)}^m \right )
-\end{equation}
-
-dove $m$ è la metrica di scelta e $\alpha_\xi^m$ rappresenta il \textit{blur value} dell'immagine $\xi$ calcolata tramite la metrica $m$. 
+Questo processo consente di ottenere una soglia coerente e adattata all'intero sistema, basata direttamente sul comportamento reale delle telecamere e sulle condizioni in cui il sistema di riconoscimento inizia a fallire.
 
 \section{Considerazioni sulla risoluzione delle immagini}
 
