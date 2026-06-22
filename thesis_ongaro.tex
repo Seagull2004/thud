@@ -279,15 +279,40 @@ Uno dei principali vantaggi di questa tecnica è la sua semplicità computaziona
 
 \subsection{Canny}
 
-In maniera completamente analoga alla metrica Laplacian appena vista, con l'operatore Canny \cite{canny} è possibile ricavare una particolare immagine di output che mostra le discontinuità di intensità rilevate. Canny si suddivide in più fasi. Inizialmente all'immagine di partenza viene applicata una convoluzione Gaussiana per rimuovere il rumore, ossia le frequenze più alte, poi tramite un filtro di derivata spaziale come Sobel \cite{sobel} o analoghi esegue il calcolo della derivata prima. Gli spigoli quindi danno origine alle creste presenti nell'immagine gradiente, queste creste vengono prese in considerazione dall'algoritmo che imposta a 0 i pixel che non hanno come valore di cresta massimale. La metrica che poi va a rilevare la sfocatura dell'immagine considera la varianza dell'immagine risultante, questo valore è direttamente proporzionale alla nitidezza ma inversamente proporzionale alla sfocatura perciò se la varianza è nulla il valore di sfocatura (\textit{blurValue}) sarà 0, il che vuol dire che l'immagine è completamente sfocata, se però la varianza è strettamente maggiore allora la metrica ne calcolerà il reciproco in modo che la metrica possa crescere insieme al livello di sfocatura dell'immagine
+La seconda metrica basata sull'\textit{edge detection} utilizza l'algoritmo di Canny \cite{canny}, uno dei metodi più noti e utilizzati per il rilevamento dei bordi nelle immagini digitali. Analogamente alla metrica basata sul Laplacian, anche questo approccio si fonda sull'ipotesi che la quantità e la qualità dei bordi presenti nell'immagine siano direttamente correlate al suo livello di nitidezza. L'algoritmo di Canny è stato progettato con l'obiettivo di individuare i contorni in modo robusto, riducendo al minimo l'influenza del rumore e massimizzando la precisione nella localizzazione dei bordi. A differenza del semplice operatore Laplacian, il metodo di Canny non si limita ad applicare un singolo filtro, ma prevede una sequenza di elaborazioni che consentono di ottenere una mappa dei bordi particolarmente pulita e accurata.
+
+La prima fase dell'algoritmo consiste nell'applicazione di un filtro Gaussiano all'immagine. Questa operazione ha lo scopo di ridurre il rumore presente nell'acquisizione ed eliminare le variazioni di intensità dovute a fenomeni non significativi. In termini di frequenze, il filtro Gaussiano attenua le componenti ad alta frequenza associate al rumore, preservando le strutture principali dell'immagine. Successivamente viene calcolato il gradiente dell'immagine mediante un operatore di derivata spaziale, tipicamente il filtro di Sobel \cite{sobel}. Il gradiente misura la rapidità con cui varia l'intensità luminosa tra pixel adiacenti e permette di individuare le regioni nelle quali sono presenti transizioni significative. Tali regioni corrispondono generalmente ai contorni degli oggetti presenti nella scena. L'immagine ottenuta dal calcolo del gradiente presenta delle strutture che possono essere interpretate come delle creste (\textit{ridges}), ovvero zone in cui il modulo del gradiente assume valori elevati. Tuttavia, queste creste possono avere uno spessore di diversi pixel e non identificano ancora in modo preciso il bordo. Per ottenere contorni più sottili e accurati, l'algoritmo applica una fase denominata \textit{non-maximum suppression}. Durante questa operazione vengono mantenuti soltanto i pixel che rappresentano un massimo locale lungo la direzione del gradiente, mentre tutti gli altri vengono posti a zero. Il risultato è una mappa dei bordi molto più precisa, nella quale i contorni appaiono ridotti ad una singola linea di pixel. Nella formulazione completa dell'algoritmo di Canny sono normalmente presenti ulteriori passaggi, come il \textit{double thresholding} e l'\textit{edge tracking by hysteresis}, che consentono di distinguere i bordi più affidabili da quelli potenzialmente generati dal rumore. Dal punto di vista della metrica di nitidezza, ciò che interessa è però principalmente l'immagine finale contenente i bordi rilevati.
+
+Una volta ottenuta la mappa dei contorni, il principio utilizzato è del tutto analogo a quello adottato per la metrica Laplacian. Viene infatti calcolata la varianza dell'immagine risultante, assumendo che una maggiore dispersione dei valori sia indicativa di una maggiore presenza di dettagli e quindi di una migliore messa a fuoco. Nel caso di un'immagine nitida, il rilevatore di Canny individua generalmente un numero elevato di contorni ben definiti. La presenza di tali strutture produce una distribuzione dei valori maggiormente dispersa e quindi una varianza più elevata. Quando invece l'immagine è sfocata, le transizioni di intensità risultano attenuate e molti bordi non vengono più rilevati. L'immagine risultante contiene quindi meno informazioni strutturali e la varianza tende a diminuire. Per ottenere un indice che cresca all'aumentare della sfocatura, viene utilizzato l'inverso della varianza:
+
+\begin{equation}
+\alpha =
+\frac{1}{\mathrm{Var}(C)}
+\end{equation}
+
+dove:
+
+\begin{itemize}
+    \item $C$ rappresenta l'immagine ottenuta dall'algoritmo di Canny;
+    \item $\mathrm{Var}(C)$ rappresenta la varianza della mappa dei bordi;
+    \item $\alpha$ rappresenta il valore di sfocatura (\textit{blur value}).
+\end{itemize}
+
+Da questa definizione segue che immagini nitide producono una varianza elevata e quindi un valore di $\alpha$ ridotto mentre immagini sfocate producono una varianza più bassa e quindi un valore di $\alpha$ maggiore. Nel caso limite in cui la varianza sia nulla, significa che l'immagine risultante non contiene alcuna informazione utile sui bordi. Tale situazione può verificarsi in presenza di immagini estremamente degradate o uniformi. In questo caso la metrica restituisce direttamente il valore massimo di sfocatura.
+
+Lo pseudocodice che implementa questa metrica è il seguente:
 
 \begin{lstlisting}[language=python]
 def getBlurValue(image):
     edges = canny(image)
+
     if edges.var() == 0:
         return 1
+
     return 1 / edges.var()
 \end{lstlisting}
+
+Rispetto alla metrica basata sul Laplacian, questo approccio presenta il vantaggio di utilizzare una procedura di rilevamento dei bordi più sofisticata e meno sensibile al rumore. La presenza della fase di smoothing iniziale e dei successivi passaggi di selezione dei contorni consente infatti di ottenere una rappresentazione più accurata delle strutture significative dell'immagine. Per tale motivo, la varianza dell'immagine prodotta dall'algoritmo di Canny può rappresentare un indicatore particolarmente efficace del livello di nitidezza, soprattutto in contesti reali nei quali le immagini possono essere affette da rumore, variazioni di illuminazione o altre sorgenti di degrado.
 
 \section{Altre metriche}
 
