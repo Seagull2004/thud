@@ -239,15 +239,43 @@ Le metriche descritte nelle sezioni successive si basano tutte su questo princip
 
 \subsection{Laplacian}
 
-Questa metrica prevede l'utilizzo del filtro Laplacian \cite{laplacian}. Questo filtro permette di calcolare la derivata spaziale di una immagine e lo fa rilevando le regioni dell'immagine che subiscono dei cambiamenti di intensità immediati. Una volta ottenuta la derivata, valutandone la sua varianza sarà possibile creare un indice inversamente proporzionale al livello di sfocatura: se la varianza è elevata allora l'immagine sarà nitida e questo deriva dal fatto tale tipo di immagini possiede solitamente dei cambiamenti piuttosto rapidi dei valori assunti dai vari pixel.
+La prima metrica appartenente alla categoria delle tecniche basate sull'\textit{edge detection} utilizza l'operatore di Laplace (\textit{Laplacian}) \cite{laplacian}. Questo operatore è uno degli strumenti più diffusi nell'ambito dell'elaborazione delle immagini per l'individuazione di contorni e variazioni locali di intensità. L'idea alla base della metrica è che una perdita di nitidezza si manifesta principalmente attraverso una riduzione delle variazioni brusche di luminosità presenti nell'immagine. Quando un'immagine è correttamente focalizzata, i contorni degli oggetti risultano ben definiti e i valori di intensità possono cambiare rapidamente passando da un pixel al successivo. Al contrario, in un'immagine sfocata tali transizioni diventano più graduali e meno marcate.
+
+L'operatore Laplacian consente di evidenziare proprio queste variazioni locali. Dal punto di vista matematico, esso calcola la seconda derivata spaziale dell'immagine, mettendo in risalto le regioni in cui l'intensità luminosa subisce cambiamenti significativi. Le aree uniformi tendono ad assumere valori prossimi allo zero, mentre i bordi e le strutture più definite producono valori di maggiore intensità. Applicando il filtro Laplacian ad un'immagine si ottiene quindi una nuova immagine nella quale i contorni risultano evidenziati. A questo punto è possibile analizzare la distribuzione dei valori ottenuti per ricavare una misura della nitidezza. Nel presente lavoro viene utilizzata la varianza dell'immagine filtrata come indicatore della quantità di dettagli presenti nella scena. La varianza misura infatti quanto i valori risultanti dal filtro siano dispersi rispetto al loro valore medio. Quando l'immagine è nitida, il filtro Laplacian produce generalmente valori molto differenti tra loro: le aree contenenti bordi generano risposte elevate, mentre le regioni uniformi producono valori prossimi allo zero. Questa elevata variabilità si traduce in una varianza elevata. Al contrario, quando l'immagine è sfocata, i contorni risultano attenuati e la risposta del filtro diventa più uniforme. I valori generati dal Laplacian tendono quindi ad essere meno dispersi e la varianza assume valori inferiori. La varianza della risposta del Laplacian può quindi essere interpretata come una misura diretta della quantità di dettagli presenti nell'immagine. Maggiore è la varianza, maggiore è la probabilità che l'immagine sia correttamente focalizzata. Per ottenere un indice che cresca all'aumentare della sfocatura viene utilizzato l'inverso della varianza:
+
+\begin{equation}
+\alpha =
+\frac{1}{\mathrm{Var}(L)}
+\end{equation}
+
+dove:
+
+\begin{itemize}
+    \item $L$ rappresenta l'immagine ottenuta applicando il filtro Laplacian;
+    \item $\mathrm{Var}(L)$ rappresenta la varianza dei valori dell'immagine filtrata;
+    \item $\alpha$ rappresenta il valore di sfocatura (\textit{blur value}).
+\end{itemize}
+
+Da questa definizione segue che:
+
+\begin{itemize}
+    \item immagini nitide producono una varianza elevata e quindi un valore di $\alpha$ ridotto;
+    \item immagini sfocate producono una varianza più bassa e quindi un valore di $\alpha$ maggiore.
+\end{itemize}
+
+Lo pseudocodice che implementa questa metrica è riportato di seguito.
 
 \begin{lstlisting}[language=python]
 def getBlurValue(image):
     edges = laplacian(image)
+
     if edges.var() == 0:
         return 1
+
     return 1 / edges.var()
 \end{lstlisting}
+
+Uno dei principali vantaggi di questa tecnica è la sua semplicità computazionale. Il calcolo del filtro Laplacian e della relativa varianza richiede infatti un numero limitato di operazioni e può essere eseguito rapidamente anche su flussi video in tempo reale. Per questo motivo la varianza del Laplacian rappresenta una delle metriche più utilizzate per la stima della nitidezza nelle applicazioni industriali e nei sistemi di visione artificiale, dove è spesso necessario ottenere una valutazione veloce dello stato di messa a fuoco dell'immagine.
 
 \subsection{Canny}
 
