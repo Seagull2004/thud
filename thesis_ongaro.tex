@@ -178,29 +178,35 @@ Le Figure successive mostrano la rappresentazione della magnitude della trasform
 
 \subsection{Skewness}
 
-Questa metrica fa uso dell'indice di \textit{skewness} \cite{skewness}, ossia un valore che permette di misurare la forma della funzione di distribuzione delle frequenze. Per costruire la curva di distribuzione vanno considerati i valori assunti dai moduli degli elementi della trasformata di Fourier andando a campionare i valori in cerchi concentrici centrati nella frequenza 0. L'indice di \textit{skewness} ci dirà poi se la distribuzione è \textit{right-skewed} con un numero positivo o \textit{left-skewed} con un numero negativo. In particolare ci aspettiamo una distribuzione \textit{right-skewed} siccome i contributi delle basse frequenze contribuiscono in maniera più significativa, specialmente quando l'immagine diventa più sfocata. L'indice di \textit{skewness} sarà poi ottenuto tramite una formula, come ad esempio quella di \textit{Pearson}:
+Questa è la seconda metrica che si basa sull'analisi della distribuzione delle frequenze presenti nell'immagine. Fa uso di un indicatore statistico: l'indice di \textit{skewness} \cite{skewness}. Tale indice misura il grado di asimmetria di una distribuzione rispetto al proprio valore medio e consente quindi di descriverne la forma. L'idea alla base di questo approccio nasce dall'osservazione che la sfocatura non modifica solamente la quantità di energia presente nelle varie frequenze, ma altera anche il modo in cui tale energia è distribuita all'interno dello spettro di Fourier. In particolare, quando un'immagine diventa sfocata, una porzione sempre maggiore dell'energia tende a concentrarsi nelle frequenze più basse, mentre il contributo delle alte frequenze diminuisce progressivamente.
 
+Per quantificare questo fenomeno si parte, come nel caso della metrica precedente, dalla Trasformata Discreta di Fourier dell'immagine. Dopo aver calcolato il modulo di ciascuna componente complessa, si ottiene la matrice delle magnitudini che rappresenta l'intensità delle diverse frequenze presenti nell'immagine. A questo punto non si effettua una semplice separazione tra frequenze basse e frequenze alte, ma si costruisce una vera e propria distribuzione delle frequenze. Per fare ciò vengono considerati una serie di cerchi concentrici centrati nella frequenza nulla, posta al centro dello spettro di Fourier. Ogni cerchio rappresenta una determinata distanza dal centro e quindi una specifica banda di frequenze. Per ciascun raggio viene calcolata la somma delle magnitudini appartenenti alla relativa corona circolare. Ripetendo questa operazione per tutti i raggi si ottiene una sequenza di valori che descrive come l'energia dell'immagine è distribuita al variare della frequenza. Dal punto di vista intuitivo, una distribuzione di questo tipo può essere interpretata come un istogramma radiale dello spettro di Fourier. I primi valori della sequenza rappresentano il contributo delle basse frequenze, mentre i valori successivi descrivono il contributo delle frequenze progressivamente più elevate. Una volta costruita la distribuzione, viene calcolato il coefficiente di \textit{skewness}. Nel presente lavoro è stata utilizzata la formula di Pearson:
 
 \begin{equation}
-  \text{Pearson's median skewness}  = 3 \cdot \frac{\text{Mean} - \text{Median}}{\text{Standard deviation}}
+\text{Pearson's median skewness}
+=
+3 \cdot
+\frac{\text{Mean} - \text{Median}}
+{\text{Standard deviation}}
 \end{equation}
 
-Come si può constatare dalle immagini che seguono, l'idea è quella che un immagine sfocata ha una curva \textit{right-skewed} più accentuata rispetto a quella di una immagine più nitida, quindi questa metrica darà un valore più alto che sta a significare che la curva si sta muovendo sempre di più da una distribuzione normale.
+Il valore ottenuto fornisce una misura dell'asimmetria della distribuzione. Un valore positivo indica una distribuzione \textit{right-skewed}, ovvero caratterizzata da una coda estesa verso destra. Un valore negativo indica una distribuzione \textit{left-skewed}, ovvero caratterizzata da una coda estesa verso sinistra. Un valore prossimo a zero indica una distribuzione sostanzialmente simmetrica. Nel caso delle immagini analizzate ci si aspetta generalmente una distribuzione \textit{right-skewed}. Questo comportamento deriva dal fatto che le basse frequenze contribuiscono naturalmente in misura maggiore rispetto alle alte frequenze. Quando l'immagine diventa sfocata tale fenomeno si accentua ulteriormente, poiché una quota sempre più elevata dell'energia si concentra nelle regioni centrali dello spettro. Di conseguenza, la distribuzione associata ad un'immagine sfocata tende ad essere più asimmetrica rispetto a quella ottenuta da un'immagine nitida. In altre parole, all'aumentare della sfocatura ci si aspetta un incremento del coefficiente di \textit{skewness}.
+
+Le figure successive mostrano un esempio di distribuzione ottenuta per due immagini aventi differenti livelli di nitidezza. Nel caso dell'immagine sfocata si osserva una maggiore concentrazione dell'energia nelle frequenze più basse, che produce una distribuzione maggiormente sbilanciata verso destra. Nel caso dell'immagine nitida, invece, il contributo delle alte frequenze risulta più significativo e la distribuzione appare più equilibrata.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\textwidth]{./img/skew-blurry.png}
-    \caption{Somma magnitudi per frequenza di una immagine sfocata}
+    \caption{Distribuzione radiale delle magnitudini della trasformata di Fourier per un'immagine sfocata. La concentrazione dell'energia nelle basse frequenze genera una distribuzione fortemente \textit{right-skewed}.}
 \end{figure}
-
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\textwidth]{./img/skew-sharp.png}
-    \caption{Somma magnitudi per frequenza di una immagine nitida}
+    \caption{Distribuzione radiale delle magnitudini della trasformata di Fourier per un'immagine nitida. La presenza di contributi più elevati alle alte frequenze rende la distribuzione meno asimmetrica.}
 \end{figure}
 
-Dopo aver calcolato l'indice di \textit{skewness} per normalizzare il risultato e mantenerlo all'interno dell'intervallo $[0,1]$ è possibile applicare la funzione sigmoide. Lo pseudocodice che descrive il calcolo per questa metrica è quindi il seguente:
+Poiché il coefficiente di \textit{skewness} può assumere valori non limitati superiormente o inferiormente, risulta conveniente applicare una funzione di normalizzazione per ottenere un indice facilmente confrontabile tra immagini differenti. A tale scopo viene utilizzata una funzione sigmoide, che permette di trasformare il valore di \textit{skewness} in un indice compreso nell'intervallo $[0,1]$. In questo modo è possibile interpretare il risultato come un valore di sfocatura normalizzato, rendendo più semplice il confronto tra immagini diverse. Lo pseudocodice riportato di seguito descrive l'implementazione della metrica.
 
 \begin{lstlisting}[language=python]
 def getBlurValue(image):
@@ -217,10 +223,13 @@ def getBlurValue(image):
     std = std(radiusValues)
     if std == 0:
         return 1
+
     skew = 3 * (mean - median) / std
+
     return sigmoid(skew)
 \end{lstlisting}
 
+L'indice finale ottenuto dalla funzione sigmoide cresce all'aumentare dell'asimmetria della distribuzione e, di conseguenza, all'aumentare della predominanza delle basse frequenze. Valori elevati dell'indice sono quindi associati ad immagini potenzialmente sfocate, mentre valori più bassi indicano una distribuzione delle frequenze maggiormente compatibile con immagini nitide.
 
 \section{Metriche basate sull'edge detection}
 
