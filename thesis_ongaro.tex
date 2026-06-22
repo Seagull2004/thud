@@ -374,18 +374,17 @@ Un aspetto rilevante nella definizione dei threshold riguarda la risoluzione del
 
 L'utilizzo di immagini ridimensionate presenta anche un vantaggio importante dal punto di vista delle metriche di sfocatura. Poiché i filtri utilizzati per simulare la sfocatura operano con kernel di dimensione fissa (ad esempio $3, 5, 7, \dots$), la normalizzazione della scala geometrica permette di rendere più coerente l'effetto della sfocatura sulle diverse immagini. In questo modo, le metriche risultano meno dipendenti dalla dimensione assoluta del \textit{plate} e più sensibili alla reale perdita di nitidezza. Considerando quindi le immagini normalizzate anziché quelle originali, è possibile ottenere valori di threshold $t_1, t_2, \dots, t_N$ più omogenei tra le diverse telecamere. Questo consente di definire un valore globale $t$ più stabile e rappresentativo, che descrive in modo più accurato il punto in cui un'immagine può essere considerata effettivamente sfocata all'interno dell'intero sistema.
 
-
 \chapter{Valutazione e confronto delle metriche}
 
-Ogni metrica porterà alla definizione di un certo $t^m$. Tale risultato deriva dal calcolo dei diversi \textit{threshold} $t_i$ ottenuti dalle diverse telecamere. Per capire quindi se una certa metrica sia buona si può osservare la relazione che è presente tra i vari $t_i$. L'idea è che se i vari \textit{threshold} derivanti dalle diverse telecamere portano a un valore univoco allora la metrica starà offrendo un limite chiaro che permette di stabilire la nitidezza di un'immagine. Questo è il motivo per cui il valore $t^m$ viene calcolato facendo la media di vari $t_i$. Per stabilire quindi se i vari \textit{threshold} forniti dalle varie telecamere hanno dei valori analoghi si può osservare la loro deviazione standard. Ogni telecamere quindi offrirà un certo insieme di valori $t_i \in [0,1]$. Il valore medio sarà $\mu = t^m$ con una deviazione standard $\sigma$.
-
-Al fine di ottenere un confronto valido tra le diverse metriche sarà necessario normalizzare la deviazione standard calcolata fatto 1 il valor medio.
+Ogni metrica introdotta nei capitoli precedenti produce un insieme di valori di soglia $t_i$, uno per ciascuna telecamera dell'infrastruttura. A partire da questi valori locali viene poi definito un threshold globale $t^m$ associato alla metrica $m$, ottenuto come media dei contributi provenienti dalle diverse telecamere. L'idea alla base della valutazione delle metriche è che una buona metrica debba fornire un comportamento coerente tra le diverse telecamere, ovvero valori di soglia il più possibile simili tra loro. In altre parole, se una metrica è stabile, i vari $t_i$ dovrebbero risultare concentrati attorno ad un valore comune, indipendentemente dalla specifica telecamera o dalla sua configurazione. Per questo motivo, oltre al valore medio $\mu = t^m$, risulta particolarmente utile analizzare la dispersione dei valori $t_i$, misurata tramite la deviazione standard $\sigma$. Una bassa deviazione standard indica infatti che la metrica fornisce stime consistenti del threshold per tutte le telecamere, mentre una deviazione elevata suggerisce una forte dipendenza dalla singola configurazione della camera. Per rendere confrontabili i risultati tra metriche diverse, la deviazione standard viene normalizzata rispetto al valor medio, ottenendo il seguente indice adimensionale:
 
 \begin{equation}
-\sigma_\text{norm} = \frac{\sigma}{\mu}
+\sigma_{\text{norm}} = \frac{\sigma}{\mu}
 \end{equation}
 
-In questo modo si può fare un confronto tra le diverse metriche e vedere quale sia quella con una deviazione standard più bassa, ossia la metrica che riesce a riesce a identificare meglio un limite che vada meglio per tutte le varie telecamere. I risultati ottenuti empiricamente per le diverse metriche sono le seguenti:
+Questo rapporto consente di confrontare in modo omogeneo metriche che operano su scale numeriche differenti e di valutare direttamente la stabilità relativa di ciascun approccio.
+
+I risultati sperimentali ottenuti per le diverse metriche sono riportati nella tabella seguente.
 
 \begin{equation}
 \begin{array}{l|l|l|l}
@@ -399,14 +398,15 @@ In questo modo si può fare un confronto tra le diverse metriche e vedere quale 
 \end{array}
 \end{equation}
 
-Si noti che la metrica con la deviazione standard più bassa è quella che utilizza la "metrica di Fourier". È interessante notare che le metriche basate sullo studio delle frequenze in generale si sono comportate meglio rispetto a quelle basate sull'edge detection, tali metriche infatti risultano avere una varianza inferiore circa i valori di \textit{threshold} assegnati dalle diverse telecamere. L'indice di skewness ha una varianza maggiore e questo è dovuto al fatto che anche se si basa fortemente sulla matrice calcolata dalla trasformata di Fourier l'indice finale è determinato dalla forma che la curva dei magnitudi di frequenze assume. Questo indice può quindi essere leggermente sviante siccome non dipende dai valori propriamente assunti dai vari contributi ma dalla forma assunta dalla curva.
+Dall'analisi dei risultati emerge chiaramente che le metriche basate sull'analisi dello spettro delle frequenze, in particolare la metrica Fourier e quella basata sulla skewness, presentano una deviazione standard normalizzata significativamente più bassa rispetto alle altre. Questo indica che tali approcci producono threshold più stabili e coerenti tra le diverse telecamere, risultando quindi meno influenzati dalle specifiche condizioni di acquisizione. Le metriche basate sull'edge detection, come Laplacian e Canny, mostrano invece una maggiore variabilità tra le telecamere. In particolare, la metrica Canny presenta la deviazione standard normalizzata più elevata tra tutte quelle considerate. Questo comportamento può essere spiegato considerando la natura stessa dell'algoritmo di Canny. Essendo una pipeline articolata che include diverse fasi (filtraggio Gaussiano, calcolo del gradiente, soppressione dei non-massimi e sogliatura), il risultato finale è particolarmente sensibile a variazioni locali dell'immagine. Differenze nella dimensione apparente del \textit{plate}, nelle condizioni di illuminazione o nel livello di rumore possono influenzare in modo significativo il numero e la qualità dei bordi rilevati. Di conseguenza, il valore della varianza dell'immagine risultante tende a variare maggiormente tra telecamere differenti, generando una maggiore dispersione dei relativi threshold. Anche la metrica basata sulla dimensione dei file JPEG presenta una variabilità non trascurabile, poiché risente non solo della nitidezza ma anche di altri fattori strutturali dell'immagine, come la complessità cromatica e la distribuzione delle texture. Questo la rende meno stabile rispetto alle metriche basate su trasformazioni più direttamente legate al contenuto frequenziale o strutturale dell'immagine.
+
+Nel complesso, i risultati suggeriscono che le metriche basate sull'analisi delle frequenze risultano più robuste nel contesto considerato, in quanto riescono a fornire stime del threshold più consistenti tra le diverse telecamere dell'infrastruttura.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\textwidth]{./img/confronto-deviazioni-t_i.png}
-    \caption{Un confronto delle deviazioni standard normalizzate dei vari $t_i$ per le varie metriche}
+    \caption{Confronto delle deviazioni standard normalizzate dei valori $t_i$ per le diverse metriche considerate.}
 \end{figure}
-
 
 \chapter{Conclusioni e considerazioni finali}
 
