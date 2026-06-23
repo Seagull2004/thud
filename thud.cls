@@ -43,7 +43,7 @@
 \ifthud@beamer
 \LoadClass[\thud@opt@beamer]{beamer}
 \else
-\LoadClass[onecolumn,twoside,\ifthud@phd 10\else 11\fi pt]{book}
+\LoadClass[onecolumn,twoside,12 pt]{book}
 \fi
 
 \RequirePackage{helvet}
